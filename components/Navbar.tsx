@@ -1,4 +1,10 @@
-import { SignInButton } from '@clerk/nextjs'
+import {
+  SignInButton,
+  UserButton,
+  SignOutButton,
+  SignedIn,
+  SignedOut,
+} from '@clerk/nextjs'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
@@ -10,12 +16,24 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-black">ChitChat</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/sign-in">
-              <SignInButton>
-                <Button className="bg-black text-white outline">Sign in</Button>
-              </SignInButton>
-            </Link>
+          <div className="flex items-center gap-4 justify-center flex-row">
+            <SignedOut>
+              <Link href="/sign-in">
+                <SignInButton>
+                  <Button className="bg-black text-white outline">
+                    Sign in
+                  </Button>
+                </SignInButton>
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <SignOutButton>
+                <Button className="bg-black text-white outline">
+                  Sign out
+                </Button>
+              </SignOutButton>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
       </div>
