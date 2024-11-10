@@ -10,5 +10,11 @@ export default function SignInLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return <main>{children}</main>
+  return (
+    <html lang="en">
+      <body>
+        <main>{children}</main>
+      </body>
+    </html>
+  )
 }
