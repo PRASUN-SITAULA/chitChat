@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Send, Menu } from 'lucide-react'
+import { SearchComponent } from './SearchBar'
 
 // Mock data for contacts and messages
 const contacts = [
@@ -80,10 +81,11 @@ export default function Chat() {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <div
-        className={`bg-white w-64 flex-shrink-0 border-r ${isMobileMenuOpen ? 'block' : 'hidden'} md:block`}
+        className={`bg-white w-82 flex-shrink-0 border-r ${isMobileMenuOpen ? 'block' : 'hidden'} md:block`}
       >
         <div className="p-4 border-b">
-          <h2 className="text-xl font-semibold">Chats</h2>
+          <h2 className="text-xl font-semibold mb-4">Chats</h2>
+          <SearchComponent />
         </div>
         <ScrollArea className="h-[calc(100vh-5rem)]">
           {contacts.map((contact) => (
@@ -120,8 +122,8 @@ export default function Chat() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <div className="bg-white p-4 border-b flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        <div className="bg-blue-200 p-4 border-b flex items-center justify-between">
+          <div className=" flex items-center space-x-3">
             <Button
               variant="ghost"
               size="icon"
@@ -147,7 +149,7 @@ export default function Chat() {
         </div>
 
         {/* Messages */}
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea className="bg-blue-100 flex-1 p-4">
           {messages.map((message) => (
             <div
               key={message.id}
