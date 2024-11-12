@@ -25,7 +25,11 @@ export async function createUser() {
   } catch (error) {
     const client = await clerkClient()
     console.error('Error creating user:', error)
-    client.users.deleteUser(userId)
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
+    await client.users.deleteUser(userId)
     return { error: 'Error creating user' }
   }
 }

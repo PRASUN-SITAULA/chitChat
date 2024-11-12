@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 export default async function SetupPage() {
   const res = await createUser()
   if (res.success) {
-    redirect('/dashboard')
+    redirect('/chat')
   }
   if (res.error) {
     return <div>Error creating user: {res.error}</div>
