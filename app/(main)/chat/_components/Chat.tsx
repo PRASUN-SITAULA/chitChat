@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Send, Menu } from 'lucide-react'
 import { SearchComponent } from './SearchBar'
+import { pusherClient } from '@/lib/pusherClient'
 
 // Mock data for contacts and messages
 const contacts = [
@@ -57,6 +58,17 @@ export default function Chat() {
   const [messages, setMessages] = useState(initialMessages)
   const [newMessage, setNewMessage] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const channel = pusherClient.subscribe(`chat-${selectedContact.id}`)
+    channel.bind('new-message', (data: string) => {
+      setMessages((current) => [...current, data.message])
+    })
+    return () => {
+      channel.unbind_all()
+      channel.unsubscribe()
+    }
+  }, [selectedContact.id])
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
