@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 
 export default function Navbar() {
   return (
-    <nav className="bg-white">
+    <nav className="bg-white border-b-blue-300 border-b-2">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

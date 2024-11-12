@@ -81,7 +81,7 @@ export default function Chat() {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <div
-        className={`bg-white w-82 flex-shrink-0 border-r ${isMobileMenuOpen ? 'block' : 'hidden'} md:block`}
+        className={`bg-white w-96 flex-shrink-0 border-r ${isMobileMenuOpen ? 'block' : 'hidden'} md:block`}
       >
         <div className="p-4 border-b">
           <h2 className="text-xl font-semibold mb-4">Chats</h2>

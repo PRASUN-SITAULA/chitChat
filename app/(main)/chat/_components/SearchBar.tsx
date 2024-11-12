@@ -61,21 +61,21 @@ export function SearchComponent() {
   >(null)
   const [isSearching, setIsSearching] = useState(false)
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSearching(true)
+  // const handleSearch = (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   setIsSearching(true)
 
-    // Simulate an API call with setTimeout
-    setTimeout(() => {
-      const result = mockUsers.find(
-        (user) =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.username.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-      setSearchResult(result || null)
-      setIsSearching(false)
-    }, 500) // Simulate a 500ms delay
-  }
+  //   // Simulate an API call with setTimeout
+  //   setTimeout(() => {
+  //     const result = mockUsers.find(
+  //       (user) =>
+  //         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //         user.username.toLowerCase().includes(searchQuery.toLowerCase()),
+  //     )
+  //     setSearchResult(result || null)
+  //     setIsSearching(false)
+  //   }, 500) // Simulate a 500ms delay
+  // }
 
   const form = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
@@ -84,6 +84,10 @@ export function SearchComponent() {
     },
   })
 
+  const onSubmit = (data: z.infer<typeof searchSchema>) => {
+    console.log(data)
+    // handleSearch(e)
+  }
   const {
     handleSubmit,
     formState: { isSubmitting },
@@ -92,33 +96,39 @@ export function SearchComponent() {
   return (
     <div className="w-full max-w-sm ">
       <Form {...form}>
-        <form className=" flex gap-4 flex-row items-center justify-start">
-          <FormField
-            control={form.control}
-            name="query"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    autoComplete="off"
-                    placeholder="Search for friends..."
-                    className="input input-bordered border-zinc-600"
-                    // onChange={(e) => setSearchQuery(e.target.value)}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <SubmitButton
-            type="submit"
-            pending={isSubmitting}
-            pendingText="Searching ..."
-          >
-            <Search className="h-4 w-4" />
-            Search
-          </SubmitButton>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className=" flex gap-4 flex-row items-center justify-start"
+        >
+          <div className="flex flex-row gap-4 items-center">
+            <FormField
+              control={form.control}
+              name="query"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      autoComplete="off"
+                      placeholder="Search for friends..."
+                      className="input input-bordered border-zinc-600"
+                      // onChange={(e) => setSearchQuery(e.target.value)}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <SubmitButton
+              type="submit"
+              pending={isSubmitting}
+              pendingText="Searching ..."
+              className="mb-auto"
+            >
+              <Search className="h-4 w-4" />
+              Search
+            </SubmitButton>
+          </div>
         </form>
       </Form>
 
