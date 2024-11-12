@@ -1,17 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Search } from 'lucide-react'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form'
 import { searchSchema } from '@/lib/Schema/searchSchema'
@@ -19,63 +16,40 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { SubmitButton } from '@/components/SubmitButton'
+import { searchUsers } from '@/actions/user'
+import { useIntersection } from '@mantine/hooks'
+import { useDebounce } from '@/lib/hooks/useDebounce'
 
-// Mock database of users
-const mockUsers = [
-  {
-    id: 1,
-    name: 'Alice Smith',
-    username: 'alice_s',
-    avatar: '/placeholder.svg?height=50&width=50',
-  },
-  {
-    id: 2,
-    name: 'Bob Johnson',
-    username: 'bob_j',
-    avatar: '/placeholder.svg?height=50&width=50',
-  },
-  {
-    id: 3,
-    name: 'Charlie Brown',
-    username: 'charlie_b',
-    avatar: '/placeholder.svg?height=50&width=50',
-  },
-  {
-    id: 4,
-    name: 'Diana Prince',
-    username: 'diana_p',
-    avatar: '/placeholder.svg?height=50&width=50',
-  },
-  {
-    id: 5,
-    name: 'Ethan Hunt',
-    username: 'ethan_h',
-    avatar: '/placeholder.svg?height=50&width=50',
-  },
-]
+interface User {
+  id: string
+  name: string
+  imageUrl: string | null
+}
+
+interface SearchSuccessResults {
+  users: User[]
+  hasMore: boolean
+  total: number
+  success: string
+}
+
+interface SearchErrorResults {
+  error: string
+}
+
+type SearchResults = SearchSuccessResults | SearchErrorResults
 
 export function SearchComponent() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResult, setSearchResult] = useState<
-    (typeof mockUsers)[0] | null
-  >(null)
+  const [users, setUsers] = useState<User[]>([])
+  const [hasMore, setHasMore] = useState(false)
+  const [page, setPage] = useState(1)
   const [isSearching, setIsSearching] = useState(false)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
 
-  // const handleSearch = (e: React.FormEvent) => {
-  //   e.preventDefault()
-  //   setIsSearching(true)
-
-  //   // Simulate an API call with setTimeout
-  //   setTimeout(() => {
-  //     const result = mockUsers.find(
-  //       (user) =>
-  //         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //         user.username.toLowerCase().includes(searchQuery.toLowerCase()),
-  //     )
-  //     setSearchResult(result || null)
-  //     setIsSearching(false)
-  //   }, 500) // Simulate a 500ms delay
-  // }
+  const { ref, entry } = useIntersection({
+    root: null,
+    threshold: 1,
+  })
 
   const form = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
@@ -83,22 +57,79 @@ export function SearchComponent() {
       query: '',
     },
   })
+  const debouncedSearchTerm = useDebounce(form.watch('query'), 300)
 
-  const onSubmit = (data: z.infer<typeof searchSchema>) => {
-    console.log(data)
-    // handleSearch(e)
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      setPage(1)
+      loadUsers(debouncedSearchTerm, 1, true)
+    }
+  }, [debouncedSearchTerm])
+
+  const loadUsers = async (
+    searchQuery: string,
+    pageNum: number,
+    isNewSearch: boolean = false,
+  ) => {
+    try {
+      setIsSearching(true)
+      const result: SearchResults = await searchUsers(searchQuery, pageNum)
+      if ('error' in result) {
+        return
+      }
+      setUsers((prev) =>
+        isNewSearch ? result.users : [...prev, ...result.users],
+      )
+      setHasMore(result.hasMore)
+    } catch (error) {
+      console.error('Search error:', error)
+    } finally {
+      setIsSearching(false)
+    }
   }
-  const {
-    handleSubmit,
-    formState: { isSubmitting },
-  } = form
+
+  const onSubmit = async (data: z.infer<typeof searchSchema>) => {
+    setPage(1)
+    const result = searchSchema.safeParse(data)
+    if (!result.success) {
+      return null
+    }
+    await loadUsers(result?.data?.query, 1, true)
+  }
+
+  // Load more when last element is visible
+  useEffect(() => {
+    if (entry?.isIntersecting && hasMore && !isSearching) {
+      const nextPage = page + 1
+      setPage(nextPage)
+      loadUsers(form.getValues('query'), nextPage)
+    }
+  }, [entry?.isIntersecting])
+
+  // Handle click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node)
+      ) {
+        form.reset()
+        setUsers([]) // Optional: clear the results
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  })
 
   return (
-    <div className="w-full max-w-sm ">
+    <div ref={searchContainerRef} className="w-full max-w-sm">
       <Form {...form}>
         <form
-          onSubmit={handleSubmit(onSubmit)}
-          className=" flex gap-4 flex-row items-center justify-start"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex gap-4 flex-row items-center justify-start"
         >
           <div className="flex flex-row gap-4 items-center">
             <FormField
@@ -111,7 +142,6 @@ export function SearchComponent() {
                       autoComplete="off"
                       placeholder="Search for friends..."
                       className="input input-bordered border-zinc-600"
-                      // onChange={(e) => setSearchQuery(e.target.value)}
                       {...field}
                     />
                   </FormControl>
@@ -121,7 +151,7 @@ export function SearchComponent() {
             />
             <SubmitButton
               type="submit"
-              pending={isSubmitting}
+              pending={form.formState.isSubmitting}
               pendingText="Searching ..."
               className="mb-auto"
             >
@@ -132,27 +162,45 @@ export function SearchComponent() {
         </form>
       </Form>
 
-      {isSearching ? (
-        <p className="text-center">Searching...</p>
-      ) : searchResult ? (
-        <div className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow">
-          <Avatar>
-            <AvatarImage src={searchResult.avatar} alt={searchResult.name} />
-            <AvatarFallback>
-              {searchResult.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="font-semibold">{searchResult.name}</h3>
-            <p className="text-sm text-gray-500">@{searchResult.username}</p>
+      {/* Results */}
+      <div className="mt-4 space-y-2">
+        {users.map((user, index) => (
+          <div
+            key={user.id}
+            ref={index === users.length - 1 ? ref : null}
+            className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow"
+          >
+            <Avatar>
+              <AvatarImage
+                src={user?.imageUrl || '/vercel.svg'}
+                alt={user.name}
+              />
+              <AvatarFallback>
+                {user.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-semibold">{user.name}</h3>
+              <p className="text-sm text-gray-500">@{user.name}</p>
+            </div>
           </div>
-        </div>
-      ) : searchQuery && !isSearching ? (
-        <p className="text-center text-gray-500">User is not available</p>
-      ) : null}
+        ))}
+
+        {/* Loading indicator */}
+        {isSearching && (
+          <div className="flex justify-center p-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
+          </div>
+        )}
+
+        {/* No results message */}
+        {users.length === 0 && !isSearching && form.getValues('query') && (
+          <p className="text-center text-gray-500">No users found</p>
+        )}
+      </div>
     </div>
   )
 }
