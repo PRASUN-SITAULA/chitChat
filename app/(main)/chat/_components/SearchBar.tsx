@@ -16,9 +16,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { SubmitButton } from '@/components/SubmitButton'
-import { searchUsers } from '@/actions/user'
+import { addFriend, searchUsers } from '@/actions/user'
 import { useIntersection } from '@mantine/hooks'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 // import { User } from '@prisma/client'
 
 interface User {
@@ -50,6 +52,7 @@ export function SearchComponent({ onSelectUser }: SearchBarProps) {
   const [page, setPage] = useState(1)
   const [isSearching, setIsSearching] = useState(false)
   const searchContainerRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   const { ref, entry } = useIntersection({
     root: null,
@@ -192,6 +195,20 @@ export function SearchComponent({ onSelectUser }: SearchBarProps) {
               <h3 className="font-semibold">{user.name}</h3>
               <p className="text-sm text-gray-500">@{user.name}</p>
             </div>
+            <Button
+              onClick={async () => {
+                const result = await addFriend(user.id)
+                if (result.success) {
+                  router.refresh()
+                }
+              }}
+              size="sm"
+              variant="outline"
+              className="bg-black text-white"
+              type="submit"
+            >
+              Add Friend
+            </Button>
           </div>
         ))}
 

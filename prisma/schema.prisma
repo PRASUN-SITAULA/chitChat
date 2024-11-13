@@ -17,8 +17,11 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  sentMessages Message[] @relation("SentMessages")
-  // receivedMessages Message[] @relation("ReceivedMessages")
+  friends  User[] @relation("UserFriends")
+  friendOf User[] @relation("UserFriends")
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
   // conversations    UserConversation[]
 }
 
@@ -54,6 +57,7 @@ model Message {
   senderId   String
   sender     User   @relation("SentMessages", fields: [senderId], references: [id])
   receiverId String
+  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id])
 
   // receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id])
   @@index([senderId])

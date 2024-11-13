@@ -1,11 +1,10 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Send, Menu } from 'lucide-react'
+import { SendHorizontal, Menu } from 'lucide-react'
 import { SearchComponent } from './SearchBar'
 import { pusherClient } from '@/lib/pusher'
 import { useRouter } from 'next/navigation'
@@ -13,52 +12,17 @@ import { User, Message } from '@prisma/client'
 import { getMessages, sendMessage } from '@/actions/messages'
 import { useAuth } from '@clerk/nextjs'
 import { getChannelName } from '@/lib/utils/getChannelName'
-// Mock data for contacts and messages
-const contacts = [
-  {
-    id: 1,
-    name: 'Alice Smith',
-    avatar: '/placeholder.svg?height=32&width=32',
-    lastMessage: 'Hey, how are you?',
-  },
-  {
-    id: 2,
-    name: 'Bob Johnson',
-    avatar: '/placeholder.svg?height=32&width=32',
-    lastMessage: 'Can we meet tomorrow?',
-  },
-  {
-    id: 3,
-    name: 'Charlie Brown',
-    avatar: '/placeholder.svg?height=32&width=32',
-    lastMessage: 'Thanks for your help!',
-  },
-  {
-    id: 4,
-    name: 'Diana Prince',
-    avatar: '/placeholder.svg?height=32&width=32',
-    lastMessage: 'See you later!',
-  },
-]
+import { FriendsList } from './FriendsList'
+import { getFriends } from '@/actions/user'
 
-const initialMessages = [
-  { id: 1, senderId: 1, text: 'Hey, how are you?', timestamp: '10:00 AM' },
-  {
-    id: 2,
-    senderId: 0,
-    text: "I'm good, thanks! How about you?",
-    timestamp: '10:02 AM',
-  },
-  {
-    id: 3,
-    senderId: 1,
-    text: 'Doing well! Any plans for the weekend?',
-    timestamp: '10:05 AM',
-  },
-]
+interface FriendsTypes {
+  id: string
+  name: string
+  imageUrl: string
+}
 
 export default function Chat() {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedUser, setSelectedUser] = useState<FriendsTypes>()
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -66,9 +30,11 @@ export default function Chat() {
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
     null,
   )
+  const [friends, setFriends] = useState<FriendsTypes[] | []>([])
   const router = useRouter()
 
   const { userId } = useAuth()
+
   // Fetch messages when selected user changes
   useEffect(() => {
     async function loadMessages() {
@@ -131,6 +97,22 @@ export default function Chat() {
     setTypingTimeout(timeout)
   }
 
+  // Add this useEffect to fetch friends
+  useEffect(() => {
+    async function loadFriends() {
+      if (!userId) return
+      try {
+        const result = await getFriends()
+        if ('success' in result) {
+          setFriends(result.friends)
+        }
+      } catch (error) {
+        console.error('Failed to load friends:', error)
+      }
+    }
+    loadFriends()
+  }, [userId])
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newMessage.trim() || !selectedUser) return
@@ -150,14 +132,14 @@ export default function Chat() {
     }
   }
 
-  const handleUserSelect = (user: User) => {
+  const handleUserSelect = (user: FriendsTypes) => {
     setSelectedUser(user)
     setIsMobileMenuOpen(false)
     setMessages([]) // Clear messages when switching users
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex min-h-full bg-gray-100">
       {/* Sidebar */}
       <div
         className={`bg-white w-96 flex-shrink-0 border-r ${
@@ -168,11 +150,42 @@ export default function Chat() {
           <h2 className="text-xl font-semibold mb-4">Search Users</h2>
           <SearchComponent onSelectUser={handleUserSelect} />
         </div>
+        <div className="p-4 border-b">
+          <h2 className="text-xl font-semibold mb-4">Friends</h2>
+          <ScrollArea className="h-[calc(100vh-15rem)]">
+            {friends.map((friend) => (
+              <div
+                key={friend.id}
+                className={`p-4 cursor-pointer hover:bg-gray-100 ${
+                  selectedUser?.id === friend.id ? 'bg-gray-100' : ''
+                }`}
+                onClick={() => handleUserSelect(friend)}
+              >
+                <div className="flex items-center space-x-3">
+                  <Avatar>
+                    <AvatarImage
+                      src={friend.imageUrl || undefined}
+                      alt={friend.name}
+                    />
+                    <AvatarFallback>
+                      {friend.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{friend.name}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </ScrollArea>
+        </div>
       </div>
-
       {/* Main Chat Area */}
       {selectedUser ? (
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col h-screen">
           {/* Chat Header */}
           <div className="bg-blue-200 p-4 border-b flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -208,54 +221,59 @@ export default function Chat() {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="bg-blue-100 flex-1 p-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex mb-4 ${
-                  message.senderId === selectedUser.id
-                    ? 'justify-start'
-                    : 'justify-end'
-                }`}
-              >
+          <div className="flex-1 flex flex-col bg-blue-100 ">
+            <ScrollArea className="absolute inset-0 p-4">
+              {messages.map((message) => (
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-lg ${
+                  key={message.id}
+                  className={`flex mb-4 ${
                     message.senderId === selectedUser.id
-                      ? 'bg-gray-200'
-                      : 'bg-blue-500 text-white'
+                      ? 'justify-start'
+                      : 'justify-end'
                   }`}
                 >
-                  <p>{message.content}</p>
-                  <p className="text-xs mt-1 text-gray-400">
-                    {new Date(message.createdAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
+                  <div
+                    className={`max-w-xs px-4 py-2 rounded-lg ${
+                      message.senderId === selectedUser.id
+                        ? 'bg-green-300'
+                        : 'bg-blue-500 text-white'
+                    }`}
+                  >
+                    <p>{message.content}</p>
+                    <p className="text-xs mt-1 text-white">
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </ScrollArea>
+              ))}
+            </ScrollArea>
 
-          {/* Message Input */}
-          <form onSubmit={handleSendMessage} className="bg-white border-t p-4">
-            <div className="flex space-x-2">
-              <Input
-                type="text"
-                placeholder="Type a message..."
-                value={newMessage}
-                onChange={(e) => {
-                  setNewMessage(e.target.value)
-                  handleTyping()
-                }}
-                className="flex-1"
-              />
-              <Button type="submit">
-                <Send className="h-4 w-4" />
-                <span className="sr-only">Send</span>
-              </Button>
-            </div>
-          </form>
+            {/* Message Input */}
+            <form
+              onSubmit={handleSendMessage}
+              className="bg-white border-t p-4"
+            >
+              <div className="flex space-x-2">
+                <Input
+                  type="text"
+                  placeholder="Type a message..."
+                  value={newMessage}
+                  onChange={(e) => {
+                    setNewMessage(e.target.value)
+                    handleTyping()
+                  }}
+                  className="flex-1 border-1 border-black bg-gray-300"
+                />
+                <Button type="submit">
+                  <SendHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Send</span>
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center">

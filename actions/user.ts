@@ -1,6 +1,8 @@
 'use server'
 import prisma from '@/lib/db'
 import { auth, currentUser, clerkClient } from '@clerk/nextjs/server'
+import { revalidatePath } from 'next/cache'
+import { cache } from 'react'
 
 export async function createUser() {
   const { userId } = await auth()
@@ -76,5 +78,56 @@ export async function searchUsers(
   } catch (error) {
     console.error('Search error:', error)
     return { error: 'Error fetching users' }
+  }
+}
+
+export const getFriends = cache(async () => {
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return { error: 'Unauthorized' }
+    }
+
+    const friends = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        friends: {
+          select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          },
+        },
+      },
+    })
+    console.log(friends.friends)
+    // friends.map((friend) => { console.log(friend)}
+    return { success: 'Friends retrieved successfully', friends: friends }
+  } catch (error) {
+    console.log(error)
+    return { error: 'Failed to fetch friends' }
+  }
+})
+
+export async function addFriend(friendId: string) {
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return { error: 'Unauthorized' }
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        friends: {
+          connect: { id: friendId },
+        },
+      },
+    })
+    revalidatePath('/chat')
+    return { success: 'Friend added successfully' }
+  } catch (error) {
+    console.log(error)
+    return { error: 'Failed to add friend' }
   }
 }
