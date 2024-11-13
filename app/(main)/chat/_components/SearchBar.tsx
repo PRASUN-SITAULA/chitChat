@@ -19,6 +19,7 @@ import { SubmitButton } from '@/components/SubmitButton'
 import { searchUsers } from '@/actions/user'
 import { useIntersection } from '@mantine/hooks'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+// import { User } from '@prisma/client'
 
 interface User {
   id: string
@@ -39,7 +40,11 @@ interface SearchErrorResults {
 
 type SearchResults = SearchSuccessResults | SearchErrorResults
 
-export function SearchComponent() {
+interface SearchBarProps {
+  onSelectUser: (user: User) => void
+}
+
+export function SearchComponent({ onSelectUser }: SearchBarProps) {
   const [users, setUsers] = useState<User[]>([])
   const [hasMore, setHasMore] = useState(false)
   const [page, setPage] = useState(1)
@@ -104,7 +109,7 @@ export function SearchComponent() {
       setPage(nextPage)
       loadUsers(form.getValues('query'), nextPage)
     }
-  }, [entry?.isIntersecting])
+  }, [entry?.isIntersecting, form, hasMore, isSearching, page])
 
   // Handle click outside
   useEffect(() => {
@@ -169,10 +174,11 @@ export function SearchComponent() {
             key={user.id}
             ref={index === users.length - 1 ? ref : null}
             className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow"
+            onClick={() => onSelectUser(user)}
           >
             <Avatar>
               <AvatarImage
-                src={user?.imageUrl || '/vercel.svg'}
+                src={user?.imageUrl || '/user.jpg'}
                 alt={user.name}
               />
               <AvatarFallback>
