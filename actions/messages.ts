@@ -1,6 +1,6 @@
 'use server'
 import prisma from '@/lib/db'
-import { pusherServer } from '@/lib/pusherServer'
+import { pusherServer } from '@/lib/pusher'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { currentUser } from '@clerk/nextjs/server'
 

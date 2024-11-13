@@ -1,5 +1,5 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { pusherServer } from '@/lib/pusherServer'
+import { pusherServer } from '@/lib/pusher'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
