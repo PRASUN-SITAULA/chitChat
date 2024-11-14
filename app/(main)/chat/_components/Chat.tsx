@@ -13,15 +13,14 @@ import { getMessages, sendMessage } from '@/actions/messages'
 import { useAuth } from '@clerk/nextjs'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { FriendsList } from './FriendsList'
-import { getFriends } from '@/actions/user'
 
 interface FriendsTypes {
   id: string
   name: string
-  imageUrl: string
+  imageUrl: string | null
 }
 
-export default function Chat() {
+export default function Chat({ friends }: { friends: FriendsTypes[] }) {
   const [selectedUser, setSelectedUser] = useState<FriendsTypes>()
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
@@ -30,7 +29,6 @@ export default function Chat() {
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
     null,
   )
-  const [friends, setFriends] = useState<FriendsTypes[] | []>([])
   const router = useRouter()
 
   const { userId } = useAuth()
@@ -84,11 +82,6 @@ export default function Chat() {
       clearTimeout(typingTimeout)
     }
 
-    // // Trigger typing event
-    // pusherClient.trigger(getChannelName(userId, selectedUser.id), 'typing', {
-    //   userId: userId,
-    // })
-
     // Set new timeout
     const timeout = setTimeout(() => {
       setTypingTimeout(null)
@@ -96,22 +89,6 @@ export default function Chat() {
 
     setTypingTimeout(timeout)
   }
-
-  // Add this useEffect to fetch friends
-  useEffect(() => {
-    async function loadFriends() {
-      if (!userId) return
-      try {
-        const result = await getFriends()
-        if ('success' in result) {
-          setFriends(result.friends)
-        }
-      } catch (error) {
-        console.error('Failed to load friends:', error)
-      }
-    }
-    loadFriends()
-  }, [userId])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -152,35 +129,11 @@ export default function Chat() {
         </div>
         <div className="p-4 border-b">
           <h2 className="text-xl font-semibold mb-4">Friends</h2>
-          <ScrollArea className="h-[calc(100vh-15rem)]">
-            {friends.map((friend) => (
-              <div
-                key={friend.id}
-                className={`p-4 cursor-pointer hover:bg-gray-100 ${
-                  selectedUser?.id === friend.id ? 'bg-gray-100' : ''
-                }`}
-                onClick={() => handleUserSelect(friend)}
-              >
-                <div className="flex items-center space-x-3">
-                  <Avatar>
-                    <AvatarImage
-                      src={friend.imageUrl || undefined}
-                      alt={friend.name}
-                    />
-                    <AvatarFallback>
-                      {friend.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{friend.name}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </ScrollArea>
+          <FriendsList
+            friends={friends}
+            // selectedUser={selectedUser}
+            // handleUserSelect={handleUserSelect}
+          />
         </div>
       </div>
       {/* Main Chat Area */}

@@ -87,8 +87,7 @@ export const getFriends = cache(async () => {
     if (!userId) {
       return { error: 'Unauthorized' }
     }
-
-    const friends = await prisma.user.findUnique({
+    const res = await prisma.user.findMany({
       where: { id: userId },
       select: {
         friends: {
@@ -100,9 +99,8 @@ export const getFriends = cache(async () => {
         },
       },
     })
-    console.log(friends.friends)
-    // friends.map((friend) => { console.log(friend)}
-    return { success: 'Friends retrieved successfully', friends: friends }
+    const friends = res.map((friend) => friend.friends)
+    return { success: 'Friends retrieved successfully', friends: friends[0] }
   } catch (error) {
     console.log(error)
     return { error: 'Failed to fetch friends' }

@@ -5,11 +5,10 @@ import { ClerkProvider } from '@clerk/nextjs'
 export default async function ChatPage() {
   const res = await getFriends()
   if (res.error) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <p>{res.error}</p>
-      </div>
-    )
+    return null
+  }
+  if (!res.friends || res.friends.length === 0) {
+    return <div>You do not have any friends, yet.</div>
   }
   return (
     <ClerkProvider dynamic>
