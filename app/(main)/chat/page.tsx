@@ -7,7 +7,7 @@ export default async function ChatPage() {
   if (res.error) {
     return null
   }
-  if (!res.friends || res.friends.length === 0) {
+  if (!res.friends) {
     return <div>You do not have any friends, yet.</div>
   }
   return (

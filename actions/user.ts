@@ -41,6 +41,10 @@ export async function searchUsers(
   page: number = 1,
   limit: number = 10,
 ) {
+  const { userId } = await auth()
+  if (!userId) {
+    return { error: 'Unauthorized' }
+  }
   const skip = (page - 1) * limit
 
   try {
@@ -48,6 +52,9 @@ export async function searchUsers(
       prisma.user.findMany({
         where: {
           name: { contains: query, mode: 'insensitive' },
+          id: {
+            not: userId,
+          },
         },
         select: {
           id: true,

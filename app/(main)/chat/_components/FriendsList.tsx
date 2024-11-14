@@ -15,6 +15,7 @@ export function FriendsList({
   friends: Friends[] | []
   handleUserSelect: (user: Friends) => void
 }) {
+  if (friends.length === 0) return <div>No friends</div>
   return (
     <ScrollArea className="h-[calc(100vh-13rem)]">
       {friends.map((friend) => (
