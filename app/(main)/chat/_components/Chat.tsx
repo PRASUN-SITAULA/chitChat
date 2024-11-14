@@ -129,11 +129,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
         </div>
         <div className="p-4 border-b">
           <h2 className="text-xl font-semibold mb-4">Friends</h2>
-          <FriendsList
-            friends={friends}
-            // selectedUser={selectedUser}
-            // handleUserSelect={handleUserSelect}
-          />
+          <FriendsList friends={friends} handleUserSelect={handleUserSelect} />
         </div>
       </div>
       {/* Main Chat Area */}
@@ -188,7 +184,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
                   <div
                     className={`max-w-xs px-4 py-2 rounded-lg ${
                       message.senderId === selectedUser.id
-                        ? 'bg-green-300'
+                        ? 'bg-purple-600 text-white'
                         : 'bg-blue-500 text-white'
                     }`}
                   >

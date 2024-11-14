@@ -3,6 +3,8 @@ import prisma from '@/lib/db'
 import { pusherServer } from '@/lib/pusher'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { currentUser } from '@clerk/nextjs/server'
+import { revalidatePath } from 'next/cache'
+import { cache } from 'react'
 
 export async function sendMessage(receiverId: string, content: string) {
   try {
@@ -20,7 +22,7 @@ export async function sendMessage(receiverId: string, content: string) {
         sender: true,
       },
     })
-
+    revalidatePath('/chat')
     // Trigger Pusher event for real-time update
     const channelName = getChannelName(user.id, receiverId)
     // Trigger Pusher event for real-time update
@@ -36,7 +38,7 @@ export async function sendMessage(receiverId: string, content: string) {
   }
 }
 
-export async function getMessages(conversationWithUserId: string) {
+export const getMessages = cache(async (conversationWithUserId: string) => {
   try {
     const user = await currentUser()
     if (!user) {
@@ -69,4 +71,4 @@ export async function getMessages(conversationWithUserId: string) {
     console.error(error)
     return { error: 'Error retrieving messages' }
   }
-}
+})
