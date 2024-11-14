@@ -175,8 +175,8 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 flex flex-col bg-blue-100 ">
-            <ScrollArea className="absolute inset-0 p-4">
+          <div className="flex-1 flex flex-col bg-blue-100 relative">
+            <ScrollArea className="flex-1 p-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -208,7 +208,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
             {/* Message Input */}
             <form
               onSubmit={handleSendMessage}
-              className="bg-white border-t p-4"
+              className="bg-white border-t p-4 sticky bottom-0"
             >
               <div className="flex space-x-2">
                 <Input
