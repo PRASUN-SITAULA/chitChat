@@ -56,9 +56,16 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
     const channel = pusherClient.subscribe(channelName)
 
     channel.bind('new-message', (data: { message: Message }) => {
-      // Add the new message to the messages state
-      setMessages((current) => [...current, data.message])
+      setMessages((current) => {
+        // Check if message already exists in the array
+        const messageExists = current.some((msg) => msg.id === data.message.id)
+        if (messageExists) {
+          return current
+        }
+        return [...current, data.message]
+      })
     })
+
     // Listen for new messages
     channel.bind('typing', ({ userId }: { userId: string }) => {
       if (userId === selectedUser.id) {
@@ -98,8 +105,6 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
       const result = await sendMessage(selectedUser.id, newMessage)
       if (result.success) {
         setNewMessage('')
-        // Optimistically update messages
-        setMessages((prev) => [...prev, result.message])
         router.refresh()
       } else {
         console.log('error')
