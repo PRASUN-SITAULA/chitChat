@@ -21,26 +21,30 @@ import { useIntersection } from '@mantine/hooks'
 import { useDebounce } from '@/lib/hooks/useDebounce'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@clerk/nextjs'
 // import { User } from '@prisma/client'
 
 interface User {
   id: string
   name: string
   imageUrl: string | null
+  friends: {
+    id: string
+  }[]
 }
 
-interface SearchSuccessResults {
-  users: User[]
-  hasMore: boolean
-  total: number
-  success: string
-}
+// interface SearchSuccessResults {
+//   users: User[]
+//   hasMore: boolean
+//   total: number
+//   success: string
+// }
 
-interface SearchErrorResults {
-  error: string
-}
+// interface SearchErrorResults {
+//   error: string
+// }
 
-type SearchResults = SearchSuccessResults | SearchErrorResults
+// type SearchResults = SearchSuccessResults | SearchErrorResults
 
 interface SearchBarProps {
   onSelectUser: (user: User) => void
@@ -54,6 +58,7 @@ export function SearchComponent({ onSelectUser }: SearchBarProps) {
   const searchContainerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
+  const { userId } = useAuth()
   const { ref, entry } = useIntersection({
     root: null,
     threshold: 1,
@@ -81,7 +86,7 @@ export function SearchComponent({ onSelectUser }: SearchBarProps) {
   ) => {
     try {
       setIsSearching(true)
-      const result: SearchResults = await searchUsers(searchQuery, pageNum)
+      const result = await searchUsers(searchQuery, pageNum)
       if ('error' in result) {
         return
       }
@@ -195,6 +200,7 @@ export function SearchComponent({ onSelectUser }: SearchBarProps) {
               <h3 className="font-semibold">{user.name}</h3>
               <p className="text-sm text-gray-500">@{user.name}</p>
             </div>
+
             <Button
               onClick={async () => {
                 const result = await addFriend(user.id)
@@ -203,11 +209,13 @@ export function SearchComponent({ onSelectUser }: SearchBarProps) {
                 }
               }}
               size="sm"
-              variant="outline"
-              className="bg-black text-white"
+              className="bg-black text-white outline"
+              disabled={user.friends.some((friend) => friend.id === userId)}
               type="submit"
             >
-              Add Friend
+              {user.friends.some((friend) => friend.id === userId)
+                ? 'Already Friends'
+                : 'Add Friend'}
             </Button>
           </div>
         ))}

@@ -60,6 +60,11 @@ export async function searchUsers(
           id: true,
           name: true,
           imageUrl: true,
+          friends: {
+            select: {
+              id: true,
+            },
+          },
         },
         take: limit,
         skip: skip,
@@ -75,7 +80,6 @@ export async function searchUsers(
     ])
 
     const hasMore = skip + users.length < total
-
     return {
       success: 'Users fetched successfully',
       users,
@@ -121,14 +125,26 @@ export async function addFriend(friendId: string) {
       return { error: 'Unauthorized' }
     }
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        friends: {
-          connect: { id: friendId },
+    await prisma.$transaction([
+      // Add friend to current user's friends list
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          friends: {
+            connect: { id: friendId },
+          },
         },
-      },
-    })
+      }),
+      // Add current user to friend's friends list
+      prisma.user.update({
+        where: { id: friendId },
+        data: {
+          friends: {
+            connect: { id: userId },
+          },
+        },
+      }),
+    ])
     revalidatePath('/chat')
     return { success: 'Friend added successfully' }
   } catch (error) {
