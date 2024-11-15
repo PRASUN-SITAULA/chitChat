@@ -116,42 +116,51 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
   }
 
   return (
-    <div className="flex min-h-full bg-gray-100">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar */}
       <div
-        className={`bg-white w-96 flex-shrink-0 border-r ${
+        className={`bg-white w-80 flex flex-col flex-shrink-0 border-r border-gray-200 shadow-sm ${
           isMobileMenuOpen ? 'block' : 'hidden'
         } md:block`}
       >
-        <div className="p-4 border-b">
-          <h2 className="text-xl font-semibold mb-4">Search Users</h2>
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Messages</h2>
           <SearchComponent onSelectUser={handleUserSelect} />
         </div>
-        <div className="p-4 border-b">
-          <h2 className="text-xl font-semibold mb-4">Friends</h2>
-          <FriendsList friends={friends} handleUserSelect={handleUserSelect} />
+        {/* Friends List Section */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="p-6 pb-2 flex-shrink-0">
+            <h2 className="text-lg font-semibold text-gray-700">Friends</h2>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <FriendsList
+              friends={friends}
+              handleUserSelect={handleUserSelect}
+            />
+          </div>
         </div>
       </div>
+
       {/* Main Chat Area */}
       {selectedUser ? (
-        <div className="flex-1 flex flex-col h-screen">
+        <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-200">
           {/* Chat Header */}
-          <div className="bg-blue-200 p-4 border-b flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+          <div className="p-4 border-b border-gray-200 shadow-sm flex items-center justify-between">
+            <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="md:hidden hover:bg-gray-100"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
-                <Menu />
+                <Menu className="h-5 w-5 text-gray-600" />
               </Button>
-              <Avatar className="bg-red-500">
+              <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-gray-200">
                 <AvatarImage
                   src={selectedUser.imageUrl || undefined}
                   alt={selectedUser.name}
                 />
-                <AvatarFallback className="bg-blue-300">
+                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                   {selectedUser.name
                     .split(' ')
                     .map((n) => n[0])
@@ -159,9 +168,11 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-xl font-semibold">{selectedUser.name}</h2>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  {selectedUser.name}
+                </h2>
                 {isTyping && (
-                  <p className="text-sm text-gray-600 animate-pulse">
+                  <p className="text-sm text-gray-500 animate-pulse">
                     typing...
                   </p>
                 )}
@@ -170,26 +181,32 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 flex flex-col bg-blue-100 relative">
-            <ScrollArea className="flex-1 p-4">
+          <div className="flex-1 flex flex-col  relative overflow-hidden">
+            <ScrollArea className="flex-1 p-6">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex mb-4 ${
+                  className={`flex mb-6 ${
                     message.senderId === selectedUser.id
                       ? 'justify-start'
                       : 'justify-end'
                   }`}
                 >
                   <div
-                    className={`max-w-xs px-4 py-2 rounded-lg ${
+                    className={`max-w-md px-6 py-3 rounded-2xl shadow-sm ${
                       message.senderId === selectedUser.id
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-blue-500 text-white'
+                        ? 'bg-gray-300 text-gray-800 border border-gray-200'
+                        : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
                     }`}
                   >
-                    <p>{message.content}</p>
-                    <p className="text-xs mt-1 text-white">
+                    <p className="text-sm">{message.content}</p>
+                    <p
+                      className={`text-xs mt-2 ${
+                        message.senderId === selectedUser.id
+                          ? 'text-gray-500'
+                          : 'text-gray-200'
+                      }`}
+                    >
                       {new Date(message.createdAt).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -203,32 +220,40 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
             {/* Message Input */}
             <form
               onSubmit={handleSendMessage}
-              className="bg-white border-t p-4 sticky bottom-0"
+              className=" border-t border-gray-200 p-4 "
             >
-              <div className="flex space-x-2">
+              <div className="max-w-4xl mx-auto flex space-x-4 ">
                 <Input
                   type="text"
-                  placeholder="Type a message..."
+                  placeholder="Type your message..."
                   value={newMessage}
                   onChange={(e) => {
                     setNewMessage(e.target.value)
                     handleTyping()
                   }}
-                  className="flex-1 border-1 border-black bg-gray-300"
+                  className="flex-1 border-black rounded-full h-10"
                 />
-                <Button type="submit">
-                  <SendHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Send</span>
+                <Button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-full px-6 py-2 flex items-center space-x-2"
+                >
+                  <SendHorizontal className="h-5 w-5" />
+                  <span className="hidden sm:inline">Send</span>
                 </Button>
               </div>
             </form>
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-500">
-            Search and select a user to start chatting
-          </p>
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+          <div className="text-center">
+            <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+              Welcome to ChitChat
+            </h3>
+            <p className="text-gray-500">
+              Search or select a friend to start messaging
+            </p>
+          </div>
         </div>
       )}
     </div>
