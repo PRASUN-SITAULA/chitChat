@@ -1,8 +1,7 @@
 'use server'
 import prisma from '@/lib/db'
 import { auth, currentUser, clerkClient } from '@clerk/nextjs/server'
-import { revalidatePath } from 'next/cache'
-import { cache } from 'react'
+import { revalidateTag, unstable_cache } from 'next/cache'
 
 export async function createUser() {
   const { userId } = await auth()
@@ -92,31 +91,34 @@ export async function searchUsers(
   }
 }
 
-export const getFriends = cache(async () => {
-  try {
-    const { userId } = await auth()
-    if (!userId) {
-      return { error: 'Unauthorized' }
-    }
-    const res = await prisma.user.findMany({
-      where: { id: userId },
-      select: {
-        friends: {
-          select: {
-            id: true,
-            name: true,
-            imageUrl: true,
+export const getFriends = unstable_cache(
+  async (userId: string) => {
+    try {
+      if (!userId) {
+        return { error: 'Unauthorized' }
+      }
+      const res = await prisma.user.findMany({
+        where: { id: userId },
+        select: {
+          friends: {
+            select: {
+              id: true,
+              name: true,
+              imageUrl: true,
+            },
           },
         },
-      },
-    })
-    const friends = res.map((friend) => friend.friends)
-    return { success: 'Friends retrieved successfully', friends: friends[0] }
-  } catch (error) {
-    console.log(error)
-    return { error: 'Failed to fetch friends' }
-  }
-})
+      })
+      const friends = res.map((friend) => friend.friends)
+      return { success: 'Friends fetched successfully', friends: friends[0] }
+    } catch (error) {
+      console.log(error)
+      return { error: 'Failed to fetch friends' }
+    }
+  },
+  ['getFriends'],
+  { tags: ['getFriends'] },
+)
 
 export async function addFriend(friendId: string) {
   try {
@@ -145,7 +147,7 @@ export async function addFriend(friendId: string) {
         },
       }),
     ])
-    revalidatePath('/chat')
+    revalidateTag('getFriends')
     return { success: 'Friend added successfully' }
   } catch (error) {
     console.log(error)

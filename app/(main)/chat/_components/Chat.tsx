@@ -8,17 +8,12 @@ import { SendHorizontal, Menu } from 'lucide-react'
 import { SearchComponent } from './SearchBar'
 import { pusherClient } from '@/lib/pusher'
 import { useRouter } from 'next/navigation'
-import { User, Message } from '@prisma/client'
+import { Message } from '@prisma/client'
 import { getMessages, sendMessage } from '@/actions/messages'
 import { useAuth } from '@clerk/nextjs'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { FriendsList } from './FriendsList'
-
-interface FriendsTypes {
-  id: string
-  name: string
-  imageUrl: string | null
-}
+import { FriendsTypes } from '@/lib/types'
 
 export default function Chat({ friends }: { friends: FriendsTypes[] }) {
   const [selectedUser, setSelectedUser] = useState<FriendsTypes>()
@@ -38,7 +33,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
     async function loadMessages() {
       if (!selectedUser || !userId) return
 
-      const result = await getMessages(selectedUser.id)
+      const result = await getMessages(selectedUser.id, userId)
       if (result.success && result.messages) {
         setMessages(result.messages)
       } else {
