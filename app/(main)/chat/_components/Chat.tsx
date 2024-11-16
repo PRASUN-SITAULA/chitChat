@@ -14,6 +14,7 @@ import { useAuth } from '@clerk/nextjs'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { FriendsList } from './FriendsList'
 import { FriendsTypes } from '@/lib/types'
+import { toast } from 'sonner'
 
 export default function Chat({ friends }: { friends: FriendsTypes[] }) {
   const [selectedUser, setSelectedUser] = useState<FriendsTypes>()
@@ -102,10 +103,11 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
         setNewMessage('')
         router.refresh()
       } else {
-        console.log('error')
+        toast.error(result.error)
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
+      toast.error('Failed to send message')
     }
   }
 
@@ -143,7 +145,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
 
       {/* Main Chat Area */}
       {selectedUser ? (
-        <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-200">
+        <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-400">
           {/* Chat Header */}
           <div className="p-4 border-b border-gray-200 shadow-sm flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -220,7 +222,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
             {/* Message Input */}
             <form
               onSubmit={handleSendMessage}
-              className=" border-t border-gray-200 p-4 "
+              className=" border-t border-gray-200 p-4 text-white"
             >
               <div className="max-w-4xl mx-auto flex space-x-4 ">
                 <Input
@@ -231,7 +233,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
                     setNewMessage(e.target.value)
                     handleTyping()
                   }}
-                  className="flex-1 border-black rounded-full h-10"
+                  className="flex-1 text-white border-black rounded-full h-10"
                 />
                 <Button
                   type="submit"

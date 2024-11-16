@@ -3,6 +3,7 @@ import '../globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 import Navbar from '@/components/Navbar'
 import { geistSans, geistMono } from '../fonts'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'ChitChat',
@@ -22,6 +23,7 @@ export default function RootLayout({
         >
           <Navbar />
           {children}
+          <Toaster duration={3000} />
         </body>
       </html>
     </ClerkProvider>
