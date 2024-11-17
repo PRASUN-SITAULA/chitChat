@@ -2,7 +2,6 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { FriendsTypes } from '@/lib/types'
-import { Badge } from '@/components/ui/badge'
 import { useState } from 'react'
 import { Message } from '@prisma/client'
 
