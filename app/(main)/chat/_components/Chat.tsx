@@ -25,6 +25,9 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
     null,
   )
+  const [friendsLastMessages, setFriendsLastMessages] = useState<
+    Record<string, Message>
+  >({})
   const router = useRouter()
 
   const { userId } = useAuth()
@@ -44,6 +47,17 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
     loadMessages()
   }, [selectedUser, userId])
 
+  //  update last messages when messages change
+  useEffect(() => {
+    if (!selectedUser || !messages.length) return
+
+    setFriendsLastMessages((prev) => ({
+      ...prev,
+      [selectedUser.id]: messages[messages.length - 1],
+    }))
+  }, [messages, selectedUser])
+
+  // handle real time chat
   useEffect(() => {
     if (!selectedUser || !userId) return
 
@@ -60,6 +74,11 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
         }
         return [...current, data.message]
       })
+      // Update last message for the friend
+      setFriendsLastMessages((prev) => ({
+        ...prev,
+        [selectedUser.id]: data.message,
+      }))
     })
 
     // Listen for new messages
@@ -138,6 +157,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
             <FriendsList
               friends={friends}
               handleUserSelect={handleUserSelect}
+              lastMessages={friendsLastMessages}
             />
           </div>
         </div>
@@ -185,38 +205,67 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
           {/* Messages */}
           <div className="flex-1 flex flex-col  relative overflow-hidden">
             <ScrollArea className="flex-1 p-6">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex mb-6 ${
-                    message.senderId === selectedUser.id
-                      ? 'justify-start'
-                      : 'justify-end'
-                  }`}
-                >
-                  <div
-                    className={`max-w-md px-6 py-3 rounded-2xl shadow-sm ${
-                      message.senderId === selectedUser.id
-                        ? 'bg-gray-300 text-gray-800 border border-gray-200'
-                        : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                    }`}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                    <p
-                      className={`text-xs mt-2 ${
+              {messages.reduce(
+                (messageGroups: JSX.Element[], message, index) => {
+                  const messageDate = new Date(
+                    message.createdAt,
+                  ).toLocaleDateString()
+                  const previousMessage = messages[index - 1]
+                  const previousDate = previousMessage
+                    ? new Date(previousMessage.createdAt).toLocaleDateString()
+                    : null
+
+                  // Add date separator if date changes or it's the first message
+                  if (!previousDate || messageDate !== previousDate) {
+                    messageGroups.push(
+                      <div
+                        key={`date-${messageDate}`}
+                        className="flex justify-center my-4"
+                      >
+                        <span className="px-4 py-1 rounded-full bg-gray-100 text-gray-600 text-sm">
+                          {messageDate}
+                        </span>
+                      </div>,
+                    )
+                  }
+
+                  messageGroups.push(
+                    <div
+                      key={message.id}
+                      className={`flex mb-6 ${
                         message.senderId === selectedUser.id
-                          ? 'text-gray-500'
-                          : 'text-gray-200'
+                          ? 'justify-start'
+                          : 'justify-end'
                       }`}
                     >
-                      {new Date(message.createdAt).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                      <div
+                        className={`max-w-md px-6 py-3 rounded-2xl shadow-sm ${
+                          message.senderId === selectedUser.id
+                            ? 'bg-gray-300 text-gray-800 border border-gray-200'
+                            : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                        }`}
+                      >
+                        <p className="text-sm">{message.content}</p>
+                        <p
+                          className={`text-xs mt-2 ${
+                            message.senderId === selectedUser.id
+                              ? 'text-gray-500'
+                              : 'text-gray-200'
+                          }`}
+                        >
+                          {new Date(message.createdAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    </div>,
+                  )
+
+                  return messageGroups
+                },
+                [],
+              )}
             </ScrollArea>
 
             {/* Message Input */}
