@@ -69,7 +69,7 @@ export function FriendsList({
                   </div>
                   <div className="flex items-center space-x-2">
                     <p className="text-sm text-gray-500 truncate">
-                      {lastMessage ? lastMessage.content : 'No messages yet'}
+                      {lastMessage ? lastMessage.content : 'Click to chat'}
                     </p>
                     {/* <Badge
                       variant="secondary"

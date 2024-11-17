@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<h1 align="center">Health Track</h1>
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white">
+  <img src="https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=fff">
+  <img src="https://github.com/PRASUN-SITAULA/carbonWise/assets/89672957/106f3a07-d14a-4ee9-9e0c-c8cfbc635a79">
+</p>
 
-## Getting Started
+## Description
+ChitChat is a modern, user-friendly instant messaging application that enables seamless communication between users.
+ChitChat provides a reliable and engaging platform for real-time communication with friends and family.
 
-First, run the development server:
+## Table of Contents
 
+- [Features](#features)
+- [Technologies](#technologies)
+- [Installation Guide](#installation-guide)
+- [License](#license)
+
+## Features
+
+**Real-time message delivery**: The application provides real-time message delivery, ensuring that messages are delivered instantly to the recipient.
+**One-on-one conversations**: Users can have one-on-one conversations with their friends and family, allowing for personalized communication.
+**Secure user authentication**: The application uses secure user authentication, ensuring that only authorized users can access the platform.
+**Search functionality**: Users can search for other users by name or username, making it easy to find the right person for communication.
+## Technologies
+
+This project is built using the following technologies:
+
+- Next.js: Frontend framework for building user interfaces.
+- Supabase: Database for storing user data.
+- Shadcn UI: UI library for styling.
+- Clerk: Authentication library for user authentication.
+- Pusher: Real-time messaging library for delivering messages.
+
+## Installation Guide
+
+### Clone this repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+https://github.com/PRASUN-SITAULA/chitChat.git
+```
+### Go into the repository
+```bash
+cd chitChat
+```
+### Install packages
+```bash
+npm install
+```
+### Configuration
+#### Database Setup
+- Create a .env file and add the following:
+```bash
+DATABASE_URL=[INSERT SUPABASE Database URL]
+DIRECT_URL=[INSERT SUPABASE Database DIRECT URL]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### Clerk Setup
+- Create a .env.local file and add the following:
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=[INSERT CLERK PUBLISHABLE KEY]
+CLERK_SECRET_KEY=[INSERT CLERK SECRET KEY]
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/setup
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### Pusher Setup
+- In the .env.local file, add the following:
+```bash
+PUSHER_APP_ID=[INSERT PUSHER APP ID]
+NEXT_PUBLIC_PUSHER_KEY=[INSERT PUSHER KEY]
+PUSHER_SECRET=[INSERT PUSHER SECRET]
+NEXT_PUBLIC_PUSHER_CLUSTER=[INSERT PUSHER CLUSTER]
+```
 
-## Learn More
+### Prisma Setup
+```bash
+npx prisma db push
+npx prisma generate
+```
+### Run the Development Server
+```bash
+npm run dev
+```
+### Visit the Page
+```bash
+Open your browser and navigate to http://localhost:3000.
+```
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
