@@ -22,30 +22,19 @@ model User {
 
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
-  // conversations    UserConversation[]
+  groups           Group[]   @relation("GroupMembers")
 }
 
-// model Conversation {
-//   id        String   @id @default(uuid())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   // Relations
-//   messages     Message[]
-//   participants UserConversation[]
-// }
-
-// model UserConversation {
-//   userId         String
-//   conversationId String
-//   lastRead       DateTime @default(now())
-
-//   // Relations
-//   user         User         @relation(fields: [userId], references: [id])
-//   conversation Conversation @relation(fields: [conversationId], references: [id])
-
-//   @@id([userId, conversationId])
-// }
+model Group {
+  id        String    @id @default(uuid())
+  name      String
+  imageUrl  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  members   User[]    @relation("GroupMembers")
+  messages  Message[]
+  ownerId   String
+}
 
 model Message {
   id        String   @id @default(uuid())
@@ -59,6 +48,6 @@ model Message {
   receiverId String
   receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id])
 
-  // receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  @@index([senderId])
+  group   Group?  @relation(fields: [groupId], references: [id])
+  groupId String?
 }
