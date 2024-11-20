@@ -3,13 +3,22 @@
 import prisma from '@/lib/db'
 import { revalidateTag } from 'next/cache'
 import { unstable_cache } from 'next/cache'
+import fs from 'fs/promises'
 
 export async function createGroup(
-  name: string,
+  formData: FormData,
   memberIds: string[],
   ownerId: string,
 ) {
+  const name = formData.get('name') as string
+  const groupImage = formData.get('groupImage') as File
+  const fileName = `${Date.now()}_${groupImage.name}`
+  const filePath = `./public/group/${fileName}}`
   try {
+    const arrayBuffer = await groupImage.arrayBuffer()
+    const buffer = new Uint8Array(arrayBuffer)
+    await fs.mkdir('./public/group', { recursive: true })
+    await fs.writeFile(filePath, buffer)
     const group = await prisma.group.create({
       data: {
         name,
@@ -17,6 +26,7 @@ export async function createGroup(
         members: {
           connect: [...memberIds, ownerId].map((id) => ({ id })),
         },
+        imageUrl: fileName,
       },
       include: {
         members: true,
@@ -25,6 +35,7 @@ export async function createGroup(
     revalidateTag('getGroups')
     return { success: 'Group created successfully', group }
   } catch (error) {
+    await fs.rm(filePath)
     console.error('Error creating group:', error)
     return { error: 'Failed to create group' }
   }

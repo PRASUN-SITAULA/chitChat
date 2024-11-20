@@ -118,7 +118,7 @@ export async function sendGroupMessage(
     })
 
     if (!group) {
-      return { success: false, error: 'Group not found' }
+      return { error: 'Group not found' }
     }
 
     // Trigger real-time updates for all group members
@@ -140,9 +140,9 @@ export async function sendGroupMessage(
       }
     }
 
-    return { success: true, message }
+    return { success: 'Message sent', message }
   } catch (error) {
     console.error('Error sending group message:', error)
-    return { success: false, error: 'Failed to send message' }
+    return { error: 'Failed to send message' }
   }
 }

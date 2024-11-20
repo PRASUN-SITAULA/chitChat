@@ -51,7 +51,12 @@ export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
                 <div className="relative">
                   {group.imageUrl ? (
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={group.imageUrl} alt={group.name} />
+                      <AvatarImage
+                        src={
+                          '/group/1732119085049_Screenshot from 2024-10-26 12-27-58.png'
+                        }
+                        alt={group.name}
+                      />
                       <AvatarFallback>
                         {group.name
                           .split(' ')

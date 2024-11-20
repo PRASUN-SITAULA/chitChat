@@ -39,7 +39,7 @@ export default function Chat({
     Record<string, Message>
   >({})
   // const [groups, setGroups] = useState<GroupType[]>([])
-  const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
+  const [selectedGroup, setSelectedGroup] = useState<GroupType>()
 
   // Fetch messages when selected user changes
   useEffect(() => {
@@ -104,6 +104,28 @@ export default function Chat({
     }
   }, [selectedUser, userId])
 
+  // Subscribe to group messages
+  useEffect(() => {
+    if (!selectedGroup || !userId) return
+
+    const groupChannel = pusherClient.subscribe(`group-${selectedGroup.id}`)
+
+    groupChannel.bind('new-group-message', (data: { message: Message }) => {
+      setMessages((current) => {
+        const messageExists = current.some((msg) => msg.id === data.message.id)
+        if (messageExists) {
+          return current
+        }
+        return [...current, data.message]
+      })
+    })
+
+    return () => {
+      groupChannel.unbind_all()
+      pusherClient.unsubscribe(`group-${selectedGroup.id}`)
+    }
+  }, [selectedGroup, userId])
+
   // Handle typing events
   const handleTyping = () => {
     if (!selectedUser || !userId) return
@@ -153,6 +175,7 @@ export default function Chat({
 
   const handleUserSelect = (user: FriendsTypes) => {
     setSelectedUser(user)
+    setSelectedGroup(undefined)
     setIsMobileMenuOpen(false)
     setMessages([]) // Clear messages when switching users
   }
@@ -195,7 +218,32 @@ export default function Chat({
       </div>
 
       {/* Main Chat Area */}
-      {selectedUser ? (
+      {selectedGroup ? (
+        <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-400">
+          <div className="p-4 border-b border-gray-200 shadow-sm flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-12 w-12 ring-1 ring-offset-1 ring-gray-200">
+                <AvatarImage
+                  src={selectedGroup.imageUrl || '/groupuser.png'}
+                  alt={selectedGroup.name}
+                />
+                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                  {selectedGroup.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-lg font-semibold">{selectedGroup.name}</h2>
+                <p className="text-sm text-gray-500">
+                  {selectedGroup.members.length} members
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : selectedUser ? (
         <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-400">
           {/* Chat Header */}
           <div className="p-4 border-b border-gray-200 shadow-sm flex items-center justify-between">
@@ -210,7 +258,7 @@ export default function Chat({
               </Button>
               <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-gray-200">
                 <AvatarImage
-                  src={selectedUser.imageUrl || undefined}
+                  src={selectedUser.imageUrl || '/user.jpg'}
                   alt={selectedUser.name}
                 />
                 <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">

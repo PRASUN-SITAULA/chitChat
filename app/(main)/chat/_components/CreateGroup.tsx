@@ -41,6 +41,7 @@ export function CreateGroup({
   const [selectedFriends, setSelectedFriends] = useState<string[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
+
   const form = useForm<z.infer<typeof groupSchema>>({
     resolver: zodResolver(groupSchema),
     defaultValues: {
@@ -53,8 +54,12 @@ export function CreateGroup({
     if (!result.success) {
       toast.error(result.error.message)
     }
+    const formData = new FormData()
+    formData.append('name', result?.data?.name as string)
+    formData.append('groupImage', result?.data?.groupImage as File)
+
     if (result?.data?.name.trim() && selectedFriends.length > 0) {
-      await createGroup(result.data.name, selectedFriends, userId)
+      await createGroup(formData, selectedFriends, userId)
       form.reset()
       setSelectedFriends([])
       toast.success('Group created successfully')
@@ -77,6 +82,27 @@ export function CreateGroup({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="groupImage"
+              render={({ field: { value, onChange, ...fieldProps } }) => (
+                <FormItem>
+                  <FormLabel>Group Profile Picture</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="bg-white"
+                      type="file"
+                      {...fieldProps}
+                      accept="image/png, image/jpeg, image/jpg"
+                      onChange={(event) =>
+                        onChange(event.target.files && event.target.files[0])
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="name"
