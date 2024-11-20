@@ -9,7 +9,7 @@ import { SearchComponent } from './SearchBar'
 import { pusherClient } from '@/lib/pusher'
 import { useRouter } from 'next/navigation'
 import { Message } from '@prisma/client'
-import { getMessages, sendMessage } from '@/actions/messages'
+import { getMessages, sendGroupMessage, sendMessage } from '@/actions/messages'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { FriendsList } from './FriendsList'
 import { FriendsTypes, GroupType } from '@/lib/types'
@@ -39,6 +39,7 @@ export default function Chat({
     Record<string, Message>
   >({})
   // const [groups, setGroups] = useState<GroupType[]>([])
+  const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
 
   // Fetch messages when selected user changes
   useEffect(() => {
@@ -125,12 +126,24 @@ export default function Chat({
     if (!newMessage.trim() || !selectedUser) return
 
     try {
-      const result = await sendMessage(selectedUser.id, newMessage)
-      if (result.success) {
-        setNewMessage('')
-        router.refresh()
-      } else {
-        toast.error(result.error)
+      if (selectedGroup) {
+        // Send group message
+        const result = await sendGroupMessage(
+          selectedGroup.id,
+          newMessage,
+          userId,
+        )
+        if (result.success) {
+          setNewMessage('')
+          router.refresh()
+        }
+      } else if (selectedUser) {
+        // Send direct message
+        const result = await sendMessage(selectedUser.id, newMessage)
+        if (result.success) {
+          setNewMessage('')
+          router.refresh()
+        }
       }
     } catch (error) {
       console.error(error)
@@ -142,6 +155,12 @@ export default function Chat({
     setSelectedUser(user)
     setIsMobileMenuOpen(false)
     setMessages([]) // Clear messages when switching users
+  }
+  const handleGroupSelect = (group: GroupType) => {
+    setSelectedGroup(group)
+    setSelectedUser(undefined)
+    setIsMobileMenuOpen(false)
+    setMessages([])
   }
 
   return (
@@ -160,7 +179,7 @@ export default function Chat({
         <div className="flex-1 flex flex-col min-h-0">
           <div className="p-6 pb-2">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Groups</h2>
-            <GroupsList groups={groups} />
+            <GroupsList groups={groups} onSelectGroup={handleGroupSelect} />
             <h2 className="text-lg font-semibold text-gray-700 mt-4">
               Friends
             </h2>

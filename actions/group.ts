@@ -1,6 +1,8 @@
 'use server'
 
 import prisma from '@/lib/db'
+import { revalidateTag } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 
 export async function createGroup(
   name: string,
@@ -20,6 +22,7 @@ export async function createGroup(
         members: true,
       },
     })
+    revalidateTag('getGroups')
     return { success: 'Group created successfully', group }
   } catch (error) {
     console.error('Error creating group:', error)
@@ -27,32 +30,41 @@ export async function createGroup(
   }
 }
 
-export async function getGroups(userId: string) {
-  try {
-    const groups = await prisma.group.findMany({
-      where: {
-        members: {
-          some: {
-            id: userId,
+export const getGroups = unstable_cache(
+  async (userId: string) => {
+    try {
+      const groups = await prisma.group.findMany({
+        where: {
+          members: {
+            some: {
+              id: userId,
+            },
           },
         },
-      },
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        members: true,
-        messages: {
-          orderBy: {
-            createdAt: 'desc',
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+          members: true,
+          messages: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            take: 1,
+            include: {
+              sender: true,
+            },
           },
-          take: 1,
         },
-      },
-    })
-    return { success: 'Groups fetched successfully', groups }
-  } catch (error) {
-    console.error('Error fetching groups:', error)
-    return { error: 'Failed to fetch groups' }
-  }
-}
+      })
+      return { success: 'Groups fetched successfully', groups }
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+      return { error: 'Failed to fetch groups' }
+    }
+  },
+  ['getGroups'],
+  {
+    tags: ['getGroups'],
+  },
+)

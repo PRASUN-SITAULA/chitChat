@@ -1,4 +1,5 @@
-import { Message, User } from '@prisma/client'
+import { Prisma, User } from '@prisma/client'
+type MessageType = Prisma.MessageGetPayload<{ include: { sender: true } }>
 
 export interface FriendsTypes {
   id: string
@@ -11,5 +12,5 @@ export interface GroupType {
   name: string
   imageUrl: string | null
   members: User[]
-  messages: Message[]
+  messages: MessageType[]
 }

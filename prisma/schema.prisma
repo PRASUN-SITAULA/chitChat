@@ -26,7 +26,7 @@ model User {
 }
 
 model Group {
-  id        String    @id @default(uuid())
+  id        String    @id @default(cuid())
   name      String
   imageUrl  String?
   createdAt DateTime  @default(now())
@@ -37,16 +37,16 @@ model Group {
 }
 
 model Message {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
   senderId   String
-  sender     User   @relation("SentMessages", fields: [senderId], references: [id])
-  receiverId String
-  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User    @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String?
+  receiver   User?   @relation("ReceivedMessages", fields: [receiverId], references: [id])
 
   group   Group?  @relation(fields: [groupId], references: [id])
   groupId String?

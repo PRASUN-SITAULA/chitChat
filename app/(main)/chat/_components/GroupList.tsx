@@ -4,47 +4,19 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Users } from 'lucide-react'
 import { useState } from 'react'
 import { GroupType } from '@/lib/types'
-// import {
-//   Tooltip,
-//   TooltipContent,
-//   TooltipProvider,
-//   TooltipTrigger,
-// } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
-// interface GroupMember {
-//   id: string
-//   name: string
-//   imageUrl: string | null
-// }
+interface GroupsListProps {
+  groups: GroupType[]
+  onSelectGroup: (group: GroupType) => void
+}
 
-// interface GroupMessage {
-//   id: string
-//   content: string
-//   createdAt: Date
-//   senderId: string
-//   sender: {
-//     name: string
-//   }
-// }
-
-// interface Group {
-//   id: string
-//   name: string
-//   imageUrl?: string | null
-//   members: GroupMember[]
-//   messages: GroupMessage[]
-// }
-
-// interface GroupsListProps {
-//   groups: Group[]
-//   onSelectGroup: (group: Group) => void
-// }
-
-export function GroupsList(
-  /*{ groups, onSelectGroup }: GroupsListProps*/ {
-    groups,
-  }: { groups: GroupType[] },
-) {
+export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
   const [selectedId, setSelectedId] = useState<string>('')
 
   if (groups.length === 0) {
@@ -71,7 +43,7 @@ export function GroupsList(
                 }`}
               onClick={() => {
                 setSelectedId(group.id)
-                // onSelectGroup(group)
+                onSelectGroup(group)
               }}
             >
               <div className="flex items-center space-x-4">
@@ -133,7 +105,7 @@ export function GroupsList(
 
                   {/* Member Avatars */}
                   <div className="flex -space-x-2 mt-2 overflow-hidden">
-                    {/* <TooltipProvider>
+                    <TooltipProvider>
                       {group.members.slice(0, 3).map((member) => (
                         <Tooltip key={member.id}>
                           <TooltipTrigger>
@@ -172,7 +144,7 @@ export function GroupsList(
                           </TooltipContent>
                         </Tooltip>
                       )}
-                    </TooltipProvider> */}
+                    </TooltipProvider>
                   </div>
                 </div>
               </div>

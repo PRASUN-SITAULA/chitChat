@@ -18,7 +18,6 @@ import { SubmitButton } from '@/components/SubmitButton'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -30,6 +29,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { createGroup } from '@/actions/group'
+import { useRouter } from 'next/navigation'
 
 export function CreateGroup({
   friends,
@@ -40,7 +40,7 @@ export function CreateGroup({
 }) {
   const [selectedFriends, setSelectedFriends] = useState<string[]>([])
   const [isOpen, setIsOpen] = useState(false)
-
+  const router = useRouter()
   const form = useForm<z.infer<typeof groupSchema>>({
     resolver: zodResolver(groupSchema),
     defaultValues: {
@@ -59,6 +59,7 @@ export function CreateGroup({
       setSelectedFriends([])
       toast.success('Group created successfully')
       setIsOpen(false)
+      router.refresh()
     }
   }
 

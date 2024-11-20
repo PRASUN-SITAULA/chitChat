@@ -76,3 +76,73 @@ export const getMessages = unstable_cache(
     tags: ['getMessages'],
   },
 )
+
+export async function sendGroupMessage(
+  groupId: string,
+  content: string,
+  userId: string,
+) {
+  try {
+    if (!userId) {
+      return { error: 'Unauthorized User' }
+    }
+
+    // Create the message
+    const message = await prisma.message.create({
+      data: {
+        content,
+        senderId: userId,
+        groupId,
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          },
+        },
+      },
+    })
+
+    // Get the group members to trigger notifications
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
+      include: {
+        members: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    })
+
+    if (!group) {
+      return { success: false, error: 'Group not found' }
+    }
+
+    // Trigger real-time updates for all group members
+    const groupChannelName = `group-${groupId}`
+    await pusherServer.trigger(groupChannelName, 'new-group-message', {
+      message,
+      groupId,
+    })
+
+    // Trigger individual notifications for group members
+    for (const member of group.members) {
+      if (member.id !== userId) {
+        const notificationChannel = `notifications-${member.id}`
+        await pusherServer.trigger(notificationChannel, 'new-notification', {
+          type: 'group-message',
+          groupId,
+          message,
+        })
+      }
+    }
+
+    return { success: true, message }
+  } catch (error) {
+    console.error('Error sending group message:', error)
+    return { success: false, error: 'Failed to send message' }
+  }
+}
