@@ -10,13 +10,23 @@ import { pusherClient } from '@/lib/pusher'
 import { useRouter } from 'next/navigation'
 import { Message } from '@prisma/client'
 import { getMessages, sendMessage } from '@/actions/messages'
-import { useAuth } from '@clerk/nextjs'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { FriendsList } from './FriendsList'
-import { FriendsTypes } from '@/lib/types'
+import { FriendsTypes, GroupType } from '@/lib/types'
 import { toast } from 'sonner'
+import { CreateGroup } from './CreateGroup'
+import { GroupsList } from './GroupList'
 
-export default function Chat({ friends }: { friends: FriendsTypes[] }) {
+export default function Chat({
+  friends,
+  userId,
+  groups,
+}: {
+  friends: FriendsTypes[]
+  userId: string
+  groups: GroupType[]
+}) {
+  const router = useRouter()
   const [selectedUser, setSelectedUser] = useState<FriendsTypes>()
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
@@ -28,9 +38,7 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
   const [friendsLastMessages, setFriendsLastMessages] = useState<
     Record<string, Message>
   >({})
-  const router = useRouter()
-
-  const { userId } = useAuth()
+  // const [groups, setGroups] = useState<GroupType[]>([])
 
   // Fetch messages when selected user changes
   useEffect(() => {
@@ -146,12 +154,16 @@ export default function Chat({ friends }: { friends: FriendsTypes[] }) {
       >
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Messages</h2>
+          <CreateGroup friends={friends} userId={userId} />
           <SearchComponent onSelectUser={handleUserSelect} />
         </div>
-        {/* Friends List Section */}
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="p-6 pb-2 flex-shrink-0">
-            <h2 className="text-lg font-semibold text-gray-700">Friends</h2>
+          <div className="p-6 pb-2">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">Groups</h2>
+            <GroupsList groups={groups} />
+            <h2 className="text-lg font-semibold text-gray-700 mt-4">
+              Friends
+            </h2>
           </div>
           <div className="flex-1 overflow-y-auto">
             <FriendsList

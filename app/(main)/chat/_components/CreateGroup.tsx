@@ -14,23 +14,50 @@ import { Users } from 'lucide-react'
 import { FriendsTypes } from '@/lib/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Checkbox } from '@/components/ui/checkbox'
+import { SubmitButton } from '@/components/SubmitButton'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { groupSchema } from '@/lib/Schema/groupSchema'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { toast } from 'sonner'
+import { createGroup } from '@/actions/group'
 
-interface CreateGroupProps {
+export function CreateGroup({
+  friends,
+  userId,
+}: {
   friends: FriendsTypes[]
-  onCreateGroup: (name: string, memberIds: string[]) => Promise<void>
-}
-
-export function CreateGroup({ friends, onCreateGroup }: CreateGroupProps) {
-  const [groupName, setGroupName] = useState('')
+  userId: string
+}) {
   const [selectedFriends, setSelectedFriends] = useState<string[]>([])
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (groupName.trim() && selectedFriends.length > 0) {
-      await onCreateGroup(groupName, selectedFriends)
-      setGroupName('')
+  const form = useForm<z.infer<typeof groupSchema>>({
+    resolver: zodResolver(groupSchema),
+    defaultValues: {
+      name: '',
+    },
+  })
+
+  const onSubmit = async (data: z.infer<typeof groupSchema>) => {
+    const result = groupSchema.safeParse(data)
+    if (!result.success) {
+      toast.error(result.error.message)
+    }
+    if (result?.data?.name.trim() && selectedFriends.length > 0) {
+      await createGroup(result.data.name, selectedFriends, userId)
+      form.reset()
       setSelectedFriends([])
+      toast.success('Group created successfully')
       setIsOpen(false)
     }
   }
@@ -38,7 +65,7 @@ export function CreateGroup({ friends, onCreateGroup }: CreateGroupProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full mb-4">
+        <Button variant="outline" className="w-full mb-4 border-2 border-black">
           <Users className="mr-2 h-4 w-4" />
           Create New Group
         </Button>
@@ -47,52 +74,67 @@ export function CreateGroup({ friends, onCreateGroup }: CreateGroupProps) {
         <DialogHeader>
           <DialogTitle>Create New Group</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="groupName">Group Name</Label>
-            <Input
-              id="groupName"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              placeholder="Enter group name"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Group Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      autoComplete="off"
+                      placeholder="Enter group name"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <div className="space-y-2">
+                    <Label>Select Members</Label>
+                    <div className="max-h-[200px] overflow-y-auto space-y-2">
+                      {friends.map((friend) => (
+                        <div
+                          key={friend.id}
+                          className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded"
+                        >
+                          <Checkbox
+                            checked={selectedFriends.includes(friend.id)}
+                            onCheckedChange={(checked) => {
+                              setSelectedFriends(
+                                checked
+                                  ? [...selectedFriends, friend.id]
+                                  : selectedFriends.filter(
+                                      (id) => id !== friend.id,
+                                    ),
+                              )
+                            }}
+                          />
+                          <Avatar className="h-8 w-8 ">
+                            <AvatarImage src={friend.imageUrl || '/user.jpg'} />
+                            <AvatarFallback>
+                              {friend.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{friend.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label>Select Members</Label>
-            <div className="max-h-[200px] overflow-y-auto space-y-2">
-              {friends.map((friend) => (
-                <div
-                  key={friend.id}
-                  className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded"
-                >
-                  <Checkbox
-                    checked={selectedFriends.includes(friend.id)}
-                    onCheckedChange={(checked) => {
-                      setSelectedFriends(
-                        checked
-                          ? [...selectedFriends, friend.id]
-                          : selectedFriends.filter((id) => id !== friend.id),
-                      )
-                    }}
-                  />
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={friend.imageUrl || undefined} />
-                    <AvatarFallback>
-                      {friend.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{friend.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <Button type="submit" className="w-full">
-            Create Group
-          </Button>
-        </form>
+            <SubmitButton
+              pendingText="Creating ..."
+              pending={form.formState.isSubmitting}
+            >
+              Create Group
+            </SubmitButton>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )
