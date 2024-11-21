@@ -13,7 +13,7 @@ export async function createGroup(
   const name = formData.get('name') as string
   const groupImage = formData.get('groupImage') as File
   const fileName = `${Date.now()}_${groupImage.name}`
-  const filePath = `./public/group/${fileName}}`
+  const filePath = `./public/group/${fileName}`
   try {
     const arrayBuffer = await groupImage.arrayBuffer()
     const buffer = new Uint8Array(arrayBuffer)

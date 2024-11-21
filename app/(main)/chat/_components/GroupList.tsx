@@ -4,12 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Users } from 'lucide-react'
 import { useState } from 'react'
 import { GroupType } from '@/lib/types'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 interface GroupsListProps {
   groups: GroupType[]
@@ -26,7 +20,6 @@ export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
       </div>
     )
   }
-
   return (
     <ScrollArea className="h-[200px] pr-4">
       <div className="space-y-2">
@@ -52,9 +45,7 @@ export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
                   {group.imageUrl ? (
                     <Avatar className="h-12 w-12">
                       <AvatarImage
-                        src={
-                          '/group/1732119085049_Screenshot from 2024-10-26 12-27-58.png'
-                        }
+                        src={`/group/${group.imageUrl}` || '/groupuser.png'}
                         alt={group.name}
                       />
                       <AvatarFallback>
@@ -104,53 +95,9 @@ export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
                         {lastMessage.content}
                       </>
                     ) : (
-                      'No messages yet'
+                      'Click to Chat'
                     )}
                   </p>
-
-                  {/* Member Avatars */}
-                  <div className="flex -space-x-2 mt-2 overflow-hidden">
-                    <TooltipProvider>
-                      {group.members.slice(0, 3).map((member) => (
-                        <Tooltip key={member.id}>
-                          <TooltipTrigger>
-                            <Avatar className="h-6 w-6 border-2 border-white">
-                              <AvatarImage
-                                src={member.imageUrl || undefined}
-                                alt={member.name}
-                              />
-                              <AvatarFallback className="text-xs">
-                                {member.name
-                                  .split(' ')
-                                  .map((n) => n[0])
-                                  .join('')}
-                              </AvatarFallback>
-                            </Avatar>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{member.name}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
-                      {group.members.length > 3 && (
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border-2 border-white">
-                              +{group.members.length - 3}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {group.members
-                                .slice(3)
-                                .map((m) => m.name)
-                                .join(', ')}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </TooltipProvider>
-                  </div>
                 </div>
               </div>
             </div>

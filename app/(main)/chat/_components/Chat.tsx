@@ -16,6 +16,7 @@ import { FriendsTypes, GroupType } from '@/lib/types'
 import { toast } from 'sonner'
 import { CreateGroup } from './CreateGroup'
 import { GroupsList } from './GroupList'
+import GroupChatHeader from './GroupChatHeader'
 
 export default function Chat({
   friends,
@@ -190,7 +191,7 @@ export default function Chat({
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar */}
       <div
-        className={`bg-white w-80 flex flex-col flex-shrink-0 border-r border-gray-200 shadow-sm ${
+        className={`bg-white w-96 flex flex-col flex-shrink-0 border-r border-gray-200 shadow-sm ${
           isMobileMenuOpen ? 'block' : 'hidden'
         } md:block`}
       >
@@ -216,36 +217,20 @@ export default function Chat({
           </div>
         </div>
       </div>
-
       {/* Main Chat Area */}
+
+      {/* Chat Header for group chat */}
       {selectedGroup ? (
         <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-400">
-          <div className="p-4 border-b border-gray-200 shadow-sm flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-12 w-12 ring-1 ring-offset-1 ring-gray-200">
-                <AvatarImage
-                  src={selectedGroup.imageUrl || '/groupuser.png'}
-                  alt={selectedGroup.name}
-                />
-                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                  {selectedGroup.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-lg font-semibold">{selectedGroup.name}</h2>
-                <p className="text-sm text-gray-500">
-                  {selectedGroup.members.length} members
-                </p>
-              </div>
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center w-full">
+              <GroupChatHeader group={selectedGroup} />
             </div>
           </div>
         </div>
       ) : selectedUser ? (
         <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-400">
-          {/* Chat Header */}
+          {/* Chat Header for one to one consversation */}
           <div className="p-4 border-b border-gray-200 shadow-sm flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button
@@ -307,7 +292,6 @@ export default function Chat({
                       </div>,
                     )
                   }
-
                   messageGroups.push(
                     <div
                       key={message.id}
