@@ -17,6 +17,7 @@ import { toast } from 'sonner'
 import { CreateGroup } from './CreateGroup'
 import { GroupsList } from './GroupList'
 import GroupChatHeader from './GroupChatHeader'
+import { MessageInputForm } from './MessageInputForm'
 
 export default function Chat({
   friends,
@@ -33,9 +34,9 @@ export default function Chat({
   const [newMessage, setNewMessage] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
-    null,
-  )
+  // const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
+  //   null,
+  // )
   const [friendsLastMessages, setFriendsLastMessages] = useState<
     Record<string, Message>
   >({})
@@ -128,21 +129,21 @@ export default function Chat({
   }, [selectedGroup, userId])
 
   // Handle typing events
-  const handleTyping = () => {
-    if (!selectedUser || !userId) return
+  // const handleTyping = () => {
+  //   if (!selectedUser || !userId) return
 
-    // Clear existing timeout
-    if (typingTimeout) {
-      clearTimeout(typingTimeout)
-    }
+  //   // Clear existing timeout
+  //   if (typingTimeout) {
+  //     clearTimeout(typingTimeout)
+  //   }
 
-    // Set new timeout
-    const timeout = setTimeout(() => {
-      setTypingTimeout(null)
-    }, 1000)
+  //   // Set new timeout
+  //   const timeout = setTimeout(() => {
+  //     setTypingTimeout(null)
+  //   }, 1000)
 
-    setTypingTimeout(timeout)
-  }
+  //   setTypingTimeout(timeout)
+  // }
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -330,7 +331,6 @@ export default function Chat({
                 [],
               )}
             </ScrollArea>
-
             {/* Message Input */}
             <form
               onSubmit={handleSendMessage}
@@ -343,7 +343,6 @@ export default function Chat({
                   value={newMessage}
                   onChange={(e) => {
                     setNewMessage(e.target.value)
-                    handleTyping()
                   }}
                   className="flex-1 text-white border-black rounded-full h-10"
                 />
@@ -364,9 +363,7 @@ export default function Chat({
             <h3 className="text-2xl font-semibold text-gray-700 mb-2">
               Welcome to ChitChat
             </h3>
-            <p className="text-gray-500">
-              Search or select a friend to start messaging
-            </p>
+            <p className="text-gray-500">Search a friend to start messaging</p>
           </div>
         </div>
       )}

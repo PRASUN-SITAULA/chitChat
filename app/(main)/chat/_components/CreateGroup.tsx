@@ -90,7 +90,7 @@ export function CreateGroup({
                   <FormLabel>Group Profile Picture</FormLabel>
                   <FormControl>
                     <Input
-                      className="bg-white"
+                      className="bg-gray-200"
                       type="file"
                       {...fieldProps}
                       accept="image/png, image/jpeg, image/jpg"

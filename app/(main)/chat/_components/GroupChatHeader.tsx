@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { Settings, MoreVertical, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
