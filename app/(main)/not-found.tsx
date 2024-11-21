@@ -3,7 +3,7 @@ import { Frown, Home } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-blue-500 to-red-500 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-blue-500 to-red-300 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-lg w-full space-y-8 text-center">
         <div className="relative">
           <h1 className="text-9xl font-extrabold text-white tracking-widest">
@@ -14,7 +14,7 @@ export default function NotFound() {
           </div>
         </div>
         <p className="text-2xl font-medium text-white">
-          Oops! The page you`&apos;re looking for doesn`&apos;t exist.
+          Oops! The page you&apos;re looking for doesn&apos;t exist.
         </p>
         <div className="mt-8">
           <Link
@@ -26,7 +26,7 @@ export default function NotFound() {
           </Link>
         </div>
         <p className="mt-2 text-sm text-white">
-          Lost? Don`&apos;t worry, we`&apos;ve got you covered.
+          Lost? Don&apos;t worry, we&apos;ve got you covered.
         </p>
       </div>
     </div>
