@@ -19,6 +19,7 @@ import { GroupsList } from './GroupList'
 import GroupChatHeader from './GroupChatHeader'
 import { MessageInputForm } from './MessageInputForm'
 import FriendChatHeader from './FriendChatHeader'
+import { ShowMessages } from './ShowMessages'
 
 export default function Chat({
   friends,
@@ -230,121 +231,50 @@ export default function Chat({
         </div>
       )}
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-400">
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center w-full">
-            {/* Chat Header for group chat */}
-            {selectedGroup && <GroupChatHeader group={selectedGroup} />}
 
-            {/* Chat Header for one to one consversation */}
-            {selectedUser && <FriendChatHeader selectedUser={selectedUser} />}
-
-            {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden hover:bg-gray-100"
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                >
-                  <Menu className="h-5 w-5 text-gray-600" />
-                </Button> */}
-            {/* Messages */}
-            {/*
-                <div className="flex-1 flex flex-col  relative overflow-hidden">
-                  <ScrollArea className="flex-1 p-6">
-                    {messages.reduce(
-                      (messageGroups: JSX.Element[], message, index) => {
-                        const messageDate = new Date(
-                          message.createdAt,
-                        ).toLocaleDateString()
-                        const previousMessage = messages[index - 1]
-                        const previousDate = previousMessage
-                          ? new Date(
-                              previousMessage.createdAt,
-                            ).toLocaleDateString()
-                          : null
-
-                        // Add date separator if date changes or it's the first message
-                        if (!previousDate || messageDate !== previousDate) {
-                          messageGroups.push(
-                            <div
-                              key={`date-${messageDate}`}
-                              className="flex justify-center my-4"
-                            >
-                              <span className="px-4 py-1 rounded-full bg-gray-100 text-gray-600 text-sm">
-                                {messageDate}
-                              </span>
-                            </div>,
-                          )
-                        }
-                        messageGroups.push(
-                          <div
-                            key={message.id}
-                            className={`flex mb-6 ${
-                              message.senderId === selectedUser.id
-                                ? 'justify-start'
-                                : 'justify-end'
-                            }`}
-                          >
-                            <div
-                              className={`max-w-md px-6 py-3 rounded-2xl shadow-sm ${
-                                message.senderId === selectedUser.id
-                                  ? 'bg-gray-300 text-gray-800 border border-gray-200'
-                                  : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                              }`}
-                            >
-                              <p className="text-sm">{message.content}</p>
-                              <p
-                                className={`text-xs mt-2 ${
-                                  message.senderId === selectedUser.id
-                                    ? 'text-gray-500'
-                                    : 'text-gray-200'
-                                }`}
-                              >
-                                {new Date(message.createdAt).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  },
-                                )}
-                              </p>
-                            </div>
-                          </div>,
-                        )
-
-                        return messageGroups
-                      },
-                      [],
-                    )}
-                  </ScrollArea>
-                  {/* Message Input */}
-            {/* <form
-                    onSubmit={handleSendMessage}
-                    className=" border-t border-gray-200 p-4 text-white"
-                  >
-                    <div className="max-w-4xl mx-auto flex space-x-4 ">
-                      <Input
-                        type="text"
-                        placeholder="Type your message..."
-                        value={newMessage}
-                        onChange={(e) => {
-                          setNewMessage(e.target.value)
-                        }}
-                        className="flex-1 text-white border-black rounded-full h-10"
-                      />
-                      <Button
-                        type="submit"
-                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-full px-6 py-2 flex items-center space-x-2"
-                      >
-                        <SendHorizontal className="h-5 w-5" />
-                        <span className="hidden sm:inline">Send</span>
-                      </Button>
-                    </div>
-                  </form> */}
-            {/* </div> */}
+      {/* Chat Header for group chat */}
+      {selectedGroup && (
+        <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-400">
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center w-full">
+              <GroupChatHeader group={selectedGroup} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Chat Header for one to one consversation */}
+      {selectedUser && (
+        <div className="flex flex-col h-screen w-full mx-16">
+          <FriendChatHeader selectedUser={selectedUser} />
+
+          <div className="flex-grow overflow-hidden">
+            <ShowMessages messages={messages} selectedUser={selectedUser} />
+          </div>
+
+          <form
+            onSubmit={handleSendMessage}
+            className="sticky bottom-0 z-10 bg-white border-t border-gray-200 p-4"
+          >
+            <div className="max-w-4xl mx-auto flex space-x-4">
+              <Input
+                type="text"
+                placeholder="Type your message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                className="flex-1 text-black border-black rounded-full h-10"
+              />
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-full px-6 py-2 flex items-center space-x-2"
+              >
+                <SendHorizontal className="h-5 w-5" />
+                <span className="hidden sm:inline">Send</span>
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
