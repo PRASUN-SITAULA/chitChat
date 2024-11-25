@@ -16,20 +16,25 @@ export function FriendsList({
 }) {
   const [selectedId, setSelectedId] = useState<string>('')
 
-  if (friends.length === 0) return <div>Please add some friends</div>
+  if (friends.length === 0)
+    return (
+      <div className="text-center p-4 text-gray-500">
+        No Friends yet. Add one to start chatting!
+      </div>
+    )
   return (
-    <ScrollArea className="h-[calc(100vh-13rem)]">
+    <ScrollArea className="h-[200px] pr-2">
       <div className="space-y-2">
         {friends.map((friend) => {
           const lastMessage = lastMessages[friend.id]
           return (
             <div
               key={friend.id}
-              className={`p-3 bg-gray-300 cursor-pointer transition-all duration-200 rounded-lg
+              className={`p-3 cursor-pointer transition-all duration-200 rounded-lg
                   ${
                     selectedId === friend.id
-                      ? 'bg-gray-200 border-l-4 border-purple-500'
-                      : 'hover:bg-gray-50'
+                      ? 'bg-gray-300 border-l-4 border-purple-500'
+                      : 'hover:bg-gray-200 bg-gray-100'
                   }`}
               onClick={() => {
                 setSelectedId(friend.id)

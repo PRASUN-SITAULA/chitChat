@@ -1,13 +1,13 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Message } from '@prisma/client'
-import { FriendsTypes } from '@/lib/types'
+import { FriendsTypes, GroupType } from '@/lib/types'
 
 export const ShowMessages = ({
   messages,
   selectedUser,
 }: {
   messages: Message[]
-  selectedUser: FriendsTypes
+  selectedUser: FriendsTypes | GroupType
 }) => {
   return (
     <div className="flex flex-col h-full">

@@ -140,9 +140,43 @@ export async function sendGroupMessage(
       }
     }
 
+    revalidateTag('getGroupMessages')
     return { success: 'Message sent', message }
   } catch (error) {
     console.error('Error sending group message:', error)
     return { error: 'Failed to send message' }
   }
 }
+
+export const getGroupMessages = unstable_cache(
+  async (groupId: string, userId: string) => {
+    try {
+      if (!userId) {
+        return { error: 'Unauthorized User' }
+      }
+      const messages = await prisma.message.findMany({
+        where: {
+          groupId,
+        },
+        orderBy: { createdAt: 'asc' },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              imageUrl: true,
+            },
+          },
+        },
+      })
+      return { success: 'Messages retrieved', messages }
+    } catch (error) {
+      console.error(error)
+      return { error: 'Error retrieving messages' }
+    }
+  },
+  ['getGroupMessages'],
+  {
+    tags: ['getGroupMessages'],
+  },
+)

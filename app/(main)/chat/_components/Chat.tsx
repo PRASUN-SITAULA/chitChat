@@ -1,15 +1,18 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { SendHorizontal, Menu } from 'lucide-react'
+import { SendHorizontal } from 'lucide-react'
 import { SearchComponent } from './SearchBar'
 import { pusherClient } from '@/lib/pusher'
 import { useRouter } from 'next/navigation'
 import { Message } from '@prisma/client'
-import { getMessages, sendGroupMessage, sendMessage } from '@/actions/messages'
+import {
+  getGroupMessages,
+  getMessages,
+  sendGroupMessage,
+  sendMessage,
+} from '@/actions/messages'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { FriendsList } from './FriendsList'
 import { FriendsTypes, GroupType } from '@/lib/types'
@@ -17,7 +20,6 @@ import { toast } from 'sonner'
 import { CreateGroup } from './CreateGroup'
 import { GroupsList } from './GroupList'
 import GroupChatHeader from './GroupChatHeader'
-import { MessageInputForm } from './MessageInputForm'
 import FriendChatHeader from './FriendChatHeader'
 import { ShowMessages } from './ShowMessages'
 
@@ -31,18 +33,19 @@ export default function Chat({
   groups: GroupType[]
 }) {
   const router = useRouter()
-  const [selectedUser, setSelectedUser] = useState<FriendsTypes>()
+  const [selectedUser, setSelectedUser] = useState<FriendsTypes | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isTyping, setIsTyping] = useState(false)
+  // const [isTyping, setIsTyping] = useState(false)
+  const [groupMessages, setGroupMessages] = useState<Message[]>([])
   // const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
   //   null,
   // )
   const [friendsLastMessages, setFriendsLastMessages] = useState<
     Record<string, Message>
   >({})
-  const [selectedGroup, setSelectedGroup] = useState<GroupType>()
+  const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
 
   // Fetch messages when selected user changes
   useEffect(() => {
@@ -94,12 +97,12 @@ export default function Chat({
     })
 
     // Listen for new messages
-    channel.bind('typing', ({ userId }: { userId: string }) => {
-      if (userId === selectedUser.id) {
-        setIsTyping(true)
-        setTimeout(() => setIsTyping(false), 2000)
-      }
-    })
+    // channel.bind('typing', ({ userId }: { userId: string }) => {
+    //   if (userId === selectedUser.id) {
+    //     setIsTyping(true)
+    //     setTimeout(() => setIsTyping(false), 2000)
+    //   }
+    // })
 
     return () => {
       channel.unbind_all()
@@ -129,6 +132,19 @@ export default function Chat({
     }
   }, [selectedGroup, userId])
 
+  useEffect(() => {
+    async function loadGroupMessages() {
+      if (!selectedGroup || !userId) return
+
+      const result = await getGroupMessages(selectedGroup.id, userId)
+      if (result.success && result.messages) {
+        setGroupMessages(result.messages)
+      } else {
+        console.error('Failed to load messages:', result.error)
+      }
+    }
+    loadGroupMessages()
+  }, [selectedGroup, userId])
   // Handle typing events
   // const handleTyping = () => {
   //   if (!selectedUser || !userId) return
@@ -148,8 +164,7 @@ export default function Chat({
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newMessage.trim() || !selectedUser) return
-
+    if (!newMessage.trim() || (!selectedUser && !selectedGroup)) return
     try {
       if (selectedGroup) {
         // Send group message
@@ -178,13 +193,13 @@ export default function Chat({
 
   const handleUserSelect = (user: FriendsTypes) => {
     setSelectedUser(user)
-    setSelectedGroup(undefined)
+    setSelectedGroup(null)
     setIsMobileMenuOpen(false)
     setMessages([]) // Clear messages when switching users
   }
   const handleGroupSelect = (group: GroupType) => {
     setSelectedGroup(group)
-    setSelectedUser(undefined)
+    setSelectedUser(null)
     setIsMobileMenuOpen(false)
     setMessages([])
   }
@@ -206,11 +221,11 @@ export default function Chat({
           <div className="p-6 pb-2">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Groups</h2>
             <GroupsList groups={groups} onSelectGroup={handleGroupSelect} />
-            <h2 className="text-lg font-semibold text-gray-700 mt-4">
+          </div>
+          <div className="p-6 pb-2">
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">
               Friends
             </h2>
-          </div>
-          <div className="flex-1 overflow-y-auto">
             <FriendsList
               friends={friends}
               handleUserSelect={handleUserSelect}
@@ -234,27 +249,48 @@ export default function Chat({
 
       {/* Chat Header for group chat */}
       {selectedGroup && (
-        <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-200 to-purple-400">
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center w-full">
-              <GroupChatHeader group={selectedGroup} />
-            </div>
+        <div className="flex flex-col h-screen w-full ml-16 bg-blue-300">
+          <GroupChatHeader group={selectedGroup} />
+          <div className="flex-grow overflow-hidden">
+            <ShowMessages
+              messages={groupMessages}
+              selectedUser={selectedGroup}
+            />
           </div>
+          <form
+            onSubmit={handleSendMessage}
+            className="sticky bottom-0 z-10 bg-blue-200 border-t border-gray-200 p-4"
+          >
+            <div className="max-w-4xl mx-auto flex space-x-4">
+              <Input
+                type="text"
+                placeholder="Type your message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                className="flex-1 text-black border-black rounded-full h-10"
+              />
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-full px-6 py-2 flex items-center space-x-2"
+              >
+                <SendHorizontal className="h-5 w-5" />
+                <span className="hidden sm:inline">Send</span>
+              </Button>
+            </div>
+          </form>
         </div>
       )}
 
       {/* Chat Header for one to one consversation */}
       {selectedUser && (
-        <div className="flex flex-col h-screen w-full mx-16">
+        <div className="flex flex-col h-screen w-full ml-16 bg-blue-300">
           <FriendChatHeader selectedUser={selectedUser} />
-
           <div className="flex-grow overflow-hidden">
             <ShowMessages messages={messages} selectedUser={selectedUser} />
           </div>
-
           <form
             onSubmit={handleSendMessage}
-            className="sticky bottom-0 z-10 bg-white border-t border-gray-200 p-4"
+            className="sticky bottom-0 z-10 bg-blue-200 border-t border-gray-200 p-4"
           >
             <div className="max-w-4xl mx-auto flex space-x-4">
               <Input

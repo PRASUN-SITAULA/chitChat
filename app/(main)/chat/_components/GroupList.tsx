@@ -21,8 +21,8 @@ export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
     )
   }
   return (
-    <ScrollArea className="h-[200px] pr-4">
-      <div className="space-y-2">
+    <ScrollArea className="h-[150px] pr-2">
+      <div className="space-y-2 ">
         {groups.map((group) => {
           const lastMessage = group.messages[0] // Getting the latest message
           return (
@@ -31,8 +31,8 @@ export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
               className={`p-3 cursor-pointer transition-all duration-200 rounded-lg hover:bg-gray-50
                 ${
                   selectedId === group.id
-                    ? 'bg-gray-100 border-l-4 border-purple-500'
-                    : 'bg-white border border-gray-200'
+                    ? 'bg-gray-300 border-l-4 border-purple-500'
+                    : 'bg-gray-100 border border-gray-200'
                 }`}
               onClick={() => {
                 setSelectedId(group.id)
