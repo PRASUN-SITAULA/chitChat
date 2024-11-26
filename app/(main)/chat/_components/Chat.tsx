@@ -6,7 +6,6 @@ import { SendHorizontal } from 'lucide-react'
 import { SearchComponent } from './SearchBar'
 import { pusherClient } from '@/lib/pusher'
 import { useRouter } from 'next/navigation'
-import { Message } from '@prisma/client'
 import {
   getGroupMessages,
   getMessages,
@@ -15,7 +14,7 @@ import {
 } from '@/actions/messages'
 import { getChannelName } from '@/lib/utils/getChannelName'
 import { FriendsList } from './FriendsList'
-import { FriendsTypes, GroupType } from '@/lib/types'
+import { FriendsTypes, GroupType, MessageType } from '@/lib/types'
 import { toast } from 'sonner'
 import { CreateGroup } from './CreateGroup'
 import { GroupsList } from './GroupList'
@@ -34,16 +33,15 @@ export default function Chat({
 }) {
   const router = useRouter()
   const [selectedUser, setSelectedUser] = useState<FriendsTypes | null>(null)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<MessageType[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   // const [isTyping, setIsTyping] = useState(false)
-  const [groupMessages, setGroupMessages] = useState<Message[]>([])
   // const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
   //   null,
   // )
   const [friendsLastMessages, setFriendsLastMessages] = useState<
-    Record<string, Message>
+    Record<string, MessageType>
   >({})
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
 
@@ -80,7 +78,7 @@ export default function Chat({
     const channelName = getChannelName(userId, selectedUser.id)
     const channel = pusherClient.subscribe(channelName)
 
-    channel.bind('new-message', (data: { message: Message }) => {
+    channel.bind('new-message', (data: { message: MessageType }) => {
       setMessages((current) => {
         // Check if message already exists in the array
         const messageExists = current.some((msg) => msg.id === data.message.id)
@@ -116,7 +114,7 @@ export default function Chat({
 
     const groupChannel = pusherClient.subscribe(`group-${selectedGroup.id}`)
 
-    groupChannel.bind('new-group-message', (data: { message: Message }) => {
+    groupChannel.bind('new-group-message', (data: { message: MessageType }) => {
       setMessages((current) => {
         const messageExists = current.some((msg) => msg.id === data.message.id)
         if (messageExists) {
@@ -138,7 +136,7 @@ export default function Chat({
 
       const result = await getGroupMessages(selectedGroup.id, userId)
       if (result.success && result.messages) {
-        setGroupMessages(result.messages)
+        setMessages(result.messages)
       } else {
         console.error('Failed to load messages:', result.error)
       }
@@ -220,7 +218,11 @@ export default function Chat({
         <div className="flex-1 flex flex-col min-h-0">
           <div className="p-6 pb-2">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Groups</h2>
-            <GroupsList groups={groups} onSelectGroup={handleGroupSelect} />
+            <GroupsList
+              groups={groups}
+              onSelectGroup={handleGroupSelect}
+              lastMessage={messages[0]}
+            />
           </div>
           <div className="p-6 pb-2">
             <h2 className="text-lg font-semibold text-gray-700 mb-2">
@@ -253,8 +255,9 @@ export default function Chat({
           <GroupChatHeader group={selectedGroup} />
           <div className="flex-grow overflow-hidden">
             <ShowMessages
-              messages={groupMessages}
+              messages={messages}
               selectedUser={selectedGroup}
+              userId={userId}
             />
           </div>
           <form
@@ -286,7 +289,11 @@ export default function Chat({
         <div className="flex flex-col h-screen w-full ml-16 bg-blue-300">
           <FriendChatHeader selectedUser={selectedUser} />
           <div className="flex-grow overflow-hidden">
-            <ShowMessages messages={messages} selectedUser={selectedUser} />
+            <ShowMessages
+              messages={messages}
+              selectedUser={selectedUser}
+              userId={userId}
+            />
           </div>
           <form
             onSubmit={handleSendMessage}

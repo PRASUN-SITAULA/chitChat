@@ -3,14 +3,19 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Users } from 'lucide-react'
 import { useState } from 'react'
-import { GroupType } from '@/lib/types'
+import { GroupType, MessageType } from '@/lib/types'
 
 interface GroupsListProps {
   groups: GroupType[]
   onSelectGroup: (group: GroupType) => void
+  lastMessage: MessageType
 }
 
-export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
+export function GroupsList({
+  groups,
+  onSelectGroup,
+  lastMessage,
+}: GroupsListProps) {
   const [selectedId, setSelectedId] = useState<string>('')
 
   if (groups.length === 0) {
@@ -24,7 +29,6 @@ export function GroupsList({ groups, onSelectGroup }: GroupsListProps) {
     <ScrollArea className="h-[150px] pr-2">
       <div className="space-y-2 ">
         {groups.map((group) => {
-          const lastMessage = group.messages[0] // Getting the latest message
           return (
             <div
               key={group.id}

@@ -1,13 +1,18 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Message } from '@prisma/client'
-import { FriendsTypes, GroupType } from '@/lib/types'
+import { FriendsTypes, GroupType, MessageType } from '@/lib/types'
+
+const isGroupType = (user: FriendsTypes | GroupType): user is GroupType => {
+  return (user as GroupType).members !== undefined
+}
 
 export const ShowMessages = ({
   messages,
   selectedUser,
+  userId,
 }: {
-  messages: Message[]
+  messages: MessageType[]
   selectedUser: FriendsTypes | GroupType
+  userId: string
 }) => {
   return (
     <div className="flex flex-col h-full">
@@ -35,7 +40,50 @@ export const ShowMessages = ({
                 </div>,
               )
             }
-
+            // if the message is sent to the group
+            if (isGroupType(selectedUser)) {
+              messageGroups.push(
+                <div
+                  key={message.id}
+                  className={`flex mb-4 w-full ${
+                    message.senderId !== userId
+                      ? 'justify-start flex-col'
+                      : 'justify-end'
+                  }`}
+                >
+                  {message.senderId !== userId && (
+                    <div>
+                      <span className="pl-2 text-md text-gray-500">
+                        {message?.sender?.name}
+                      </span>
+                    </div>
+                  )}
+                  <div
+                    className={`max-w-48 px-6 py-3 rounded-2xl shadow-sm ${
+                      message.senderId === userId
+                        ? 'bg-gradient-to-r from-purple-600 to-blue-600   text-white'
+                        : 'bg-gray-300 text-gray-800 border border-gray-200'
+                    }`}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                    <p
+                      className={`text-xs mt-2 ${
+                        message.senderId === userId
+                          ? 'text-gray-200'
+                          : 'text-gray-500'
+                      }`}
+                    >
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  </div>
+                </div>,
+              )
+              return messageGroups
+            }
+            // if message is sent to a friend
             messageGroups.push(
               <div
                 key={message.id}

@@ -59,7 +59,7 @@ export const getGroups = unstable_cache(
           members: true,
           messages: {
             orderBy: {
-              createdAt: 'desc',
+              createdAt: 'asc',
             },
             take: 1,
             include: {
