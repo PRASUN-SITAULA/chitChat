@@ -44,6 +44,7 @@ export default function Chat({
     Record<string, MessageType>
   >({})
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null)
+  const [groupMessages, setGroupMessages] = useState<MessageType[]>([])
 
   // Fetch messages when selected user changes
   useEffect(() => {
@@ -115,7 +116,7 @@ export default function Chat({
     const groupChannel = pusherClient.subscribe(`group-${selectedGroup.id}`)
 
     groupChannel.bind('new-group-message', (data: { message: MessageType }) => {
-      setMessages((current) => {
+      setGroupMessages((current) => {
         const messageExists = current.some((msg) => msg.id === data.message.id)
         if (messageExists) {
           return current
@@ -123,26 +124,27 @@ export default function Chat({
         return [...current, data.message]
       })
     })
-
     return () => {
       groupChannel.unbind_all()
       pusherClient.unsubscribe(`group-${selectedGroup.id}`)
     }
   }, [selectedGroup, userId])
 
+  // load group messages
   useEffect(() => {
     async function loadGroupMessages() {
       if (!selectedGroup || !userId) return
 
       const result = await getGroupMessages(selectedGroup.id, userId)
       if (result.success && result.messages) {
-        setMessages(result.messages)
+        setGroupMessages(result.messages)
       } else {
         console.error('Failed to load messages:', result.error)
       }
     }
     loadGroupMessages()
   }, [selectedGroup, userId])
+
   // Handle typing events
   // const handleTyping = () => {
   //   if (!selectedUser || !userId) return
@@ -199,7 +201,7 @@ export default function Chat({
     setSelectedGroup(group)
     setSelectedUser(null)
     setIsMobileMenuOpen(false)
-    setMessages([])
+    setGroupMessages([])
   }
 
   return (
@@ -221,7 +223,7 @@ export default function Chat({
             <GroupsList
               groups={groups}
               onSelectGroup={handleGroupSelect}
-              lastMessage={messages[0]}
+              groupMessages={groupMessages}
             />
           </div>
           <div className="p-6 pb-2">
@@ -255,7 +257,7 @@ export default function Chat({
           <GroupChatHeader group={selectedGroup} />
           <div className="flex-grow overflow-hidden">
             <ShowMessages
-              messages={messages}
+              messages={groupMessages}
               selectedUser={selectedGroup}
               userId={userId}
             />
@@ -283,7 +285,6 @@ export default function Chat({
           </form>
         </div>
       )}
-
       {/* Chat Header for one to one consversation */}
       {selectedUser && (
         <div className="flex flex-col h-screen w-full ml-16 bg-blue-300">

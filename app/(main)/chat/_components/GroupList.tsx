@@ -8,13 +8,13 @@ import { GroupType, MessageType } from '@/lib/types'
 interface GroupsListProps {
   groups: GroupType[]
   onSelectGroup: (group: GroupType) => void
-  lastMessage: MessageType
+  groupMessages: MessageType[]
 }
 
 export function GroupsList({
   groups,
   onSelectGroup,
-  lastMessage,
+  groupMessages,
 }: GroupsListProps) {
   const [selectedId, setSelectedId] = useState<string>('')
 
@@ -29,6 +29,7 @@ export function GroupsList({
     <ScrollArea className="h-[150px] pr-2">
       <div className="space-y-2 ">
         {groups.map((group) => {
+          const lastMessage = groupMessages[groupMessages.length - 1]
           return (
             <div
               key={group.id}

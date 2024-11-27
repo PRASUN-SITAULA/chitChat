@@ -86,7 +86,6 @@ export async function sendGroupMessage(
     if (!userId) {
       return { error: 'Unauthorized User' }
     }
-
     // Create the message
     const message = await prisma.message.create({
       data: {
@@ -104,7 +103,6 @@ export async function sendGroupMessage(
         },
       },
     })
-
     // Get the group members to trigger notifications
     const group = await prisma.group.findUnique({
       where: { id: groupId },
