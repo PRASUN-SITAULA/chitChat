@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { SendHorizontal } from 'lucide-react'
+import { SendHorizontal, BookImage } from 'lucide-react'
 import { SearchComponent } from './SearchBar'
 import { pusherClient } from '@/lib/pusher'
 import { useRouter } from 'next/navigation'
@@ -21,6 +21,7 @@ import { GroupsList } from './GroupList'
 import GroupChatHeader from './GroupChatHeader'
 import FriendChatHeader from './FriendChatHeader'
 import { ShowMessages } from './ShowMessages'
+import handleImageUpload from '@/actions/imageUpload'
 
 export default function Chat({
   friends,
@@ -204,6 +205,12 @@ export default function Chat({
     setGroupMessages([])
   }
 
+  const handleImageSend = async (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    await handleImageUpload(formData)
+  }
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar */}
@@ -281,6 +288,25 @@ export default function Chat({
                 <SendHorizontal className="h-5 w-5" />
                 <span className="hidden sm:inline">Send</span>
               </Button>
+              <input
+                type="file"
+                id="imageUploadGroup"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleImageSend(file)
+                  }
+                }}
+              />
+              <Button
+                onClick={() =>
+                  document.getElementById('imageUploadGroup')?.click()
+                }
+              >
+                <BookImage className="h-5 w-5" />
+              </Button>
             </div>
           </form>
         </div>
@@ -300,7 +326,7 @@ export default function Chat({
             onSubmit={handleSendMessage}
             className="sticky bottom-0 z-10 bg-blue-200 border-t border-gray-200 p-4"
           >
-            <div className="max-w-4xl mx-auto flex space-x-4">
+            <div className="max-w-4xl mx-auto flex space-x-2">
               <Input
                 type="text"
                 placeholder="Type your message..."
@@ -314,6 +340,23 @@ export default function Chat({
               >
                 <SendHorizontal className="h-5 w-5" />
                 <span className="hidden sm:inline">Send</span>
+              </Button>
+              <input
+                type="file"
+                id="imageUpload"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleImageSend(file)
+                  }
+                }}
+              />
+              <Button
+                onClick={() => document.getElementById('imageUpload')?.click()}
+              >
+                <BookImage className="h-5 w-5" />
               </Button>
             </div>
           </form>

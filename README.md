@@ -20,6 +20,7 @@ ChitChat provides a reliable and engaging platform for real-time communication w
 
 **Real-time message delivery**: The application provides real-time message delivery, ensuring that messages are delivered instantly to the recipient.
 **One-on-one conversations**: Users can have one-on-one conversations with their friends and family, allowing for personalized communication.
+**Group chat**: Users can create and join groups, enabling them to have group chats with multiple users.
 **Secure user authentication**: The application uses secure user authentication, ensuring that only authorized users can access the platform.
 **Search functionality**: Users can search for other users by name or username, making it easy to find the right person for communication.
 ## Technologies
