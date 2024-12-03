@@ -16,7 +16,7 @@ export interface GroupType {
 
 export interface MessageType {
   id: string
-  content: string
+  content: string | null
   createdAt: Date
   updatedAt: Date
   senderId: string
@@ -27,4 +27,5 @@ export interface MessageType {
     id: string
     imageUrl: string | null
   }
+  messageImageUrl: string | null
 }

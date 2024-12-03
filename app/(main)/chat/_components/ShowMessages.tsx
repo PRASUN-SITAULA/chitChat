@@ -1,5 +1,6 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { FriendsTypes, GroupType, MessageType } from '@/lib/types'
+import Image from 'next/image'
 
 const isGroupType = (user: FriendsTypes | GroupType): user is GroupType => {
   return (user as GroupType).members !== undefined
@@ -100,7 +101,20 @@ export const ShowMessages = ({
                       : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  {message.content && (
+                    <p className="text-sm">{message.content}</p>
+                  )}
+                  {message.messageImageUrl && (
+                    <Image
+                      src={message.messageImageUrl}
+                      alt="Message attachment"
+                      width={400}
+                      height={200}
+                      className="max-w-md rounded-lg my-2"
+                      loading="lazy"
+                    />
+                  )}
+
                   <p
                     className={`text-xs mt-2 ${
                       message.senderId === selectedUser.id

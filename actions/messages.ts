@@ -5,15 +5,23 @@ import { getChannelName } from '@/lib/utils/getChannelName'
 import { currentUser } from '@clerk/nextjs/server'
 import { revalidateTag, unstable_cache } from 'next/cache'
 
-export async function sendMessage(receiverId: string, content: string) {
+export async function sendMessage(
+  receiverId: string,
+  content?: string,
+  imageUrl?: string,
+) {
   try {
     const user = await currentUser()
     if (!user) {
       return { error: 'Unauthorized User' }
     }
+    if (!content && !imageUrl) {
+      return { error: 'No content or image provided' }
+    }
     const message = await prisma.message.create({
       data: {
         content: content,
+        messageImageUrl: imageUrl,
         senderId: user.id,
         receiverId: receiverId,
       },

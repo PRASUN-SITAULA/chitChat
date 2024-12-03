@@ -9,9 +9,18 @@ export default async function handleImageUpload(formData: FormData) {
     const { data, error } = await supabase.storage
       .from('messages_storage')
       .upload(`messages/${Date.now()}-${image.name}`, image)
-    console.log(data)
-    console.log(error)
+
+    if (error) {
+      return { error: error }
+    }
+    // Get the public URL of the uploaded image
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('messages_storage').getPublicUrl(data.path)
+
+    return { success: 'Image uploaded successfully', data: publicUrl }
   } catch (error) {
+    return { error: 'An error occurred while uploading the image' }
     console.log(error)
   }
 }

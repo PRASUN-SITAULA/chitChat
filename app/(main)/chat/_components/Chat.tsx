@@ -206,9 +206,25 @@ export default function Chat({
   }
 
   const handleImageSend = async (file: File) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    await handleImageUpload(formData)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const result = await handleImageUpload(formData)
+      if (result.error) {
+        toast.error('Failed to upload image')
+        return
+      }
+      // Send message with image URL
+      if (selectedGroup) {
+        // await sendGroupMessage(selectedGroup.id, undefined, userId, result.data)
+      } else if (selectedUser) {
+        await sendMessage(selectedUser.id, undefined, result.data)
+      }
+      router.refresh()
+    } catch (error) {
+      console.error('Failed to upload image', error)
+      toast.error('Failed to upload image')
+    }
   }
 
   return (
