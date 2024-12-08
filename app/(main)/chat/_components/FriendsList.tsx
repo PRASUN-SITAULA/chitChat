@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { FriendsTypes } from '@/lib/types'
 import { useState } from 'react'
 import { Message } from '@prisma/client'
+import { BookImage } from 'lucide-react'
 
 export function FriendsList({
   friends,
@@ -74,7 +75,18 @@ export function FriendsList({
                   </div>
                   <div className="flex items-center space-x-2">
                     <p className="text-sm text-gray-500 truncate">
-                      {lastMessage ? lastMessage.content : 'Click to chat'}
+                      {lastMessage ? (
+                        lastMessage.messageImageUrl ? (
+                          <span>
+                            Image
+                            <BookImage className="inline-block h-4 w-4 pl-1" />
+                          </span>
+                        ) : (
+                          lastMessage.content
+                        )
+                      ) : (
+                        'Click to chat'
+                      )}
                     </p>
                     {/* <Badge
                       variant="secondary"

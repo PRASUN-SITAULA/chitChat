@@ -115,7 +115,6 @@ export default function Chat({
     if (!selectedGroup || !userId) return
 
     const groupChannel = pusherClient.subscribe(`group-${selectedGroup.id}`)
-
     groupChannel.bind('new-group-message', (data: { message: MessageType }) => {
       setGroupMessages((current) => {
         const messageExists = current.some((msg) => msg.id === data.message.id)
@@ -216,7 +215,7 @@ export default function Chat({
       }
       // Send message with image URL
       if (selectedGroup) {
-        // await sendGroupMessage(selectedGroup.id, undefined, userId, result.data)
+        await sendGroupMessage(selectedGroup.id, userId, undefined, result.data)
       } else if (selectedUser) {
         await sendMessage(selectedUser.id, undefined, result.data)
       }

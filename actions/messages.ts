@@ -87,8 +87,9 @@ export const getMessages = unstable_cache(
 
 export async function sendGroupMessage(
   groupId: string,
-  content: string,
   userId: string,
+  content?: string,
+  imageUrl?: string,
 ) {
   try {
     if (!userId) {
@@ -100,6 +101,7 @@ export async function sendGroupMessage(
         content,
         senderId: userId,
         groupId,
+        messageImageUrl: imageUrl,
       },
       include: {
         sender: {
