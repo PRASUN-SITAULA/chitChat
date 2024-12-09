@@ -33,19 +33,6 @@ interface User {
   }[]
 }
 
-// interface SearchSuccessResults {
-//   users: User[]
-//   hasMore: boolean
-//   total: number
-//   success: string
-// }
-
-// interface SearchErrorResults {
-//   error: string
-// }
-
-// type SearchResults = SearchSuccessResults | SearchErrorResults
-
 interface SearchBarProps {
   onSelectUser: (user: User) => void
 }

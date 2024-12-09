@@ -79,3 +79,23 @@ export const getGroups = unstable_cache(
     tags: ['getGroups'],
   },
 )
+
+export async function AddMembersToGroup(groupId: string, memberIds: string[]) {
+  try {
+    await prisma.group.update({
+      where: {
+        id: groupId,
+      },
+      data: {
+        members: {
+          connect: [...memberIds].map((id) => ({ id })),
+        },
+      },
+    })
+    revalidateTag('getGroups')
+    return { success: 'Members added successfully' }
+  } catch (error) {
+    console.error('Error adding members to group:', error)
+    return { error: 'Failed to add members to group' }
+  }
+}

@@ -276,7 +276,7 @@ export default function Chat({
       {/* Chat Header for group chat */}
       {selectedGroup && (
         <div className="flex flex-col h-screen w-full ml-16 bg-blue-300">
-          <GroupChatHeader group={selectedGroup} />
+          <GroupChatHeader group={selectedGroup} friends={friends} />
           <div className="flex-grow overflow-hidden">
             <ShowMessages
               messages={groupMessages}

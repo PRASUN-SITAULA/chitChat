@@ -23,11 +23,12 @@ ChitChat provides a reliable and engaging platform for real-time communication w
 **Group chat**: Users can create and join groups, enabling them to have group chats with multiple users.
 **Secure user authentication**: The application uses secure user authentication, ensuring that only authorized users can access the platform.
 **Search functionality**: Users can search for other users by name or username, making it easy to find the right person for communication.
+
 ## Technologies
 
 This project is built using the following technologies:
 
-- Next.js: Frontend framework for building user interfaces.
+- Next.js: FullStack React framework.
 - Supabase: Database for storing user data.
 - Shadcn UI: UI library for styling.
 - Clerk: Authentication library for user authentication.
