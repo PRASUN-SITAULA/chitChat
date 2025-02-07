@@ -91,6 +91,10 @@ npm run dev
 Open your browser and navigate to http://localhost:3000.
 ```
 
+## Screenshots
+![Image](https://github.com/user-attachments/assets/c33c18b0-2950-4068-b2c7-b8493284a511)
+![Image](https://github.com/user-attachments/assets/55d233ef-8c8c-4979-9dc2-c9dd5ae61aa4)
+![Image](https://github.com/user-attachments/assets/65ea509f-061c-4b57-96b0-9d03f4634405)
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
